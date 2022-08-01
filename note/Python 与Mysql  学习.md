@@ -17,7 +17,7 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
 + 再删除第二步加的$\color{red}{skip-grant-tables}$  使用密码登录模式
 + 重启MySQL5、重启MySQL
 
-## 2.mysq了语法（回顾）
+## 2.mysq语法（回顾）
 
 ### 2.1数据库
 
@@ -72,7 +72,107 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
   )default charset=utf-8  
   ```
 
++ 删除表
 
+  ```sql
+  drop table 表名
+  ```
+
+
+
+### 2.3 常用数据类型
+
++ tinyint
+
+  ```sql
+  #有符号  取值范围 -128~127
+  #无符号 取值范围 0~255 unsinght
+  
+  create table tb(
+      	id int auto_increment primary key,
+          age tinyint unsigned, 
+  
+  )default charset=utf-8
+  
+  ```
+
++ int
+
+  ```sql
+  #带符号范围- 2147483648~2147483647
+  #无符号范围是 0~4294967295。
+  ```
+
+  
+
++ bigint
+
+  ```sql
+  #有符号范围是 -9223372036854775808~9223372036854775807
+  #无符号范围是  0 ~ 18446744073709551615
+  ```
+
++  float
+
++ double
+
++ decimal
+
+  ```sql
+  create table tb(
+      	id int auto_increment primary key,
+          salary decimal(m,d), 
+  
+  )default charset=utf-8
+  # m代表数字总数（不包含负号），d 代表小数点后个数 m最大值为65，d最大值为30
+  ```
+
++ char(m) 查询速度快
+
+  ```sql
+  #定长字符串 m最大容纳数255字符
+  char(11) #固定存储11个字符 哪怕不足11个，也会存11个
+  ```
+
++ varchar 更节省内存
+
+  ```sql
+  #变长字符串 最大容纳数65535字节 /3 = m最大字符
+  varchar(11)  #真实有多长就存储多长 最长存储长度11
+  ```
+
++ text
+
+  ```sql
+  #一般用来存储可变的大字符串 65535（2**16-1）字符
+  长文本一般使用text 新闻 文章
+  ```
+
++ mediumtext
+
+  ```sql
+  #可以存储2**24-1(16777215)字符
+  ```
+
++ longtext
+
+  ```sql
+  #可存储2**32-1 字符 or 4GB
+  ```
+
++ datetime
+
+  ```sql
+  YYYY-MM-DD HH:MM:SS
+  ```
+
++ date
+
+  ```sql
+  YYYY-MM-DD
+  ```
+
+  
 
 
 
