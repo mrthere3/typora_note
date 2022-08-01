@@ -1,4 +1,4 @@
-# *Python* 与*Mysql*  学习
+#  *Python* 与*Mysql*  学习
 
 ## 1.安装mysql
 
@@ -23,7 +23,7 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
 
 + 查看数据库
 
-  ```
+  ```sql
   show databases;
   ```
 
@@ -35,7 +35,7 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
 
 + 删除数据库
 
-  ```
+  ```sql
   drop database 数据库名字;
   ```
 
@@ -46,4 +46,33 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
   ```
 
 ### 2.2 数据表
+
++ 查看表
+
+  ```sql
+  show databases
+  ```
+
+
++ 创建表
+
+  ```sql
+  create table 表名(
+         id int,  #列名称 类型,
+         name varchar(16)  #列名称 类型,
+         age int  #列名称 类型,
+  )default charset=utf-8
+  
+  
+  create table 表名(
+  	   id int auto_increment primary key, #设置主键 （主键不允许为空）auto 为自加关键字
+         name varchar(16)  not null #列名称 类型  不允许为空
+         age int default 3  #插入数据时age列默认值为3  
+  
+  )default charset=utf-8  
+  ```
+
+
+
+
 
