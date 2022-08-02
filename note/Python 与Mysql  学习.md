@@ -1,4 +1,4 @@
-#  *Python* 与*Mysql*  学习
+#  *Mysql*  学习
 
 ## 1.安装mysql
 
@@ -29,8 +29,8 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
 
 + 创建数据库
 
-  ```
-  create databases 数据库名字 default charset utf-8 cllate utf-8_general_ci;
+  ```sql
+  create databases 数据库名字 default charset utf-8 collate utf-8_general_ci;
   ```
 
 + 删除数据库
@@ -172,7 +172,92 @@ docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql
   YYYY-MM-DD
   ```
 
+
+### 2.4 数据行操作
+
+#### 1. 新增数据行
+
+```sql
+insert into  表名 (列名，列名) values(值，值);
+insert into  表名 (列名，列名) values(值，值),(值，值),(值，值),(值，值)；
+
+```
+
+#### 2. 删除数据行
+
+```sql
+delete from tablename;
+delete from tablename where 条件;
+```
+
+#### 3.修改数据行
+
+```sql
+update tablename set 列= 值;
+update tablename set 列= 值,列= 值;
+update tablename set 列= 值,列= 值 where 条件;
+```
+
+#### 4.查询数据
+
+```sql
+select * from tablename; # *代表全部 *可以修改为任意列名 多项使用,分割开
+select * from tablename where 条件;
+```
+
+## 3.*python* 实现*mysql* 操作
+
++  python代码实现
+  + 添加用户
+  + 删除用户
+  + 查看用户
+  + 更新用户信息
+
++ 创建数据库和表
+
+  ```SQL
+  create databases unicom default charset utf-8 collate utf-8_general_ci;
   
+  use unicom
+  
+  create table admin(
+  	   id int auto_increment primary key, #设置主键 （主键不允许为空）auto 为自加关键字
+         username varchar(16)  not null, #列名称 类型  不允许为空
+         psssword varchar(64)  not null，
+         mobile char(11) not null  #插入数据时age列默认值为3  
+  
+  )default charset=utf-8  
+  ```
+
++ ```python
+  import pymysql
+  #连接mysql 
+  conn = pymysql.connect(host="127.0.0.1",port=3306，user="root",password="123456")
+  cursor = conn.cursor(cursor=pymsql.cursor.DicttCursor) #将读取到得数据设置为字典类型
+  cursor.execute("sql")
+  #提交sql
+  conn.commit()
+  #关闭
+  cursor.close()
+  conn.close()
+  #或者使用with 进行操作后的安全关闭
+  
+  with conn.cursor(cursor=pymsql.cursor.DicttCursor) as cursor:
+      try:
+          sql = "UPDATE test SET name=(%s), age=(%s) WHERE id=(%s)"
+          cursor.executemany(sql, val_list)
+          db.commit() #with在结束后会自行关闭cursor
+      except:
+          db.rollback() #在错误时候自行进行数据行回滚 保持数据一致性
+  db.close()
+  
+  ```
+
+  
+
+  
+
+
 
 
 
