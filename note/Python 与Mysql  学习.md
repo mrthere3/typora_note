@@ -205,7 +205,7 @@ select * from tablename; # *代表全部 *可以修改为任意列名 多项使�
 select * from tablename where 条件;
 ```
 
-## 3.*python* 实现*mysql* 操作
+## 3.*python* 实现*mysql* 操作 
 
 +  python代码实现
   + 添加用户
@@ -235,6 +235,7 @@ select * from tablename where 条件;
   conn = pymysql.connect(host="127.0.0.1",port=3306，user="root",password="123456")
   cursor = conn.cursor(cursor=pymsql.cursor.DicttCursor) #将读取到得数据设置为字典类型
   cursor.execute("sql")
+  data_list= currsro.fetchall() #获取符合条件的所有数据 currsro.fetone() 只获取一条数据
   #提交sql
   conn.commit()
   #关闭
@@ -252,12 +253,9 @@ select * from tablename where 条件;
   db.close()
   
   ```
-
   
 
-  
+<font size =5>$\color{red}{对于sql语句不要用python的字符串 格式化进行拼接，容易造成sql注入的安全问题，一定要用execute+参数}$ </font>
 
-
-
-
+## 
 
