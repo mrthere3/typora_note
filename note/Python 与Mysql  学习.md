@@ -257,5 +257,5 @@ select * from tablename where 条件;
 
 <font size =5>$\color{red}{对于sql语句不要用python的字符串 格式化进行拼接，容易造成sql注入的安全问题，一定要用execute+参数}$ </font>
 
-## 
+
 
