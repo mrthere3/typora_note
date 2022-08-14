@@ -2,7 +2,7 @@
 
 ## 1.安装mysql
 
-### 1.1 docker快速部署
+### 1.1 docker快速部署（我的mysql数据密码123456）
 
 ~~~dockerfile
 docker run --name mysql01 -d -p 3306:3306 -v G:/dockerdata/mysql/conf:/etc/mysql/conf.d -v G:/dockerdata/mysql/data:/var/lib/mysql -v G:/dockerdata/mysql/logs:/etc/mysql/logs -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7 
