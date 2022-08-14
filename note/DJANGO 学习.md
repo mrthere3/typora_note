@@ -97,7 +97,7 @@ python manage.py startapp appname
 
 ```python
 def user_list(request):
-	return render(request,"user_list.html") #在templates目录下寻找该HTML文件
+	return render(request,"user_list.html") #在app目录下的templates目录下寻找该HTML文件
 #优先在templates目录下寻找
 #根据app的注册顺序，在每个app下的templates目录中去寻找
 ```
@@ -116,5 +116,52 @@ def user_list(request):
 
 ![](https://cdn.jsdelivr.net/gh/mrthere3/typora_note/img/js/202208051712055.png)
 
+## 5. *DJANGO* 模板语法
+
+本质上：在html中写一些占位符，由数据对这些占位符进行替换和处理。 
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <ul>
+        {% for i in data_list %}
+            <li>{{ i }}</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
+```
+
+模板中使用特定的模板语法
+
+```python
+from django.shortcuts import render,HttpResponse
+
+# Create your views here.
+def index(request):
+    return render(request,'index.html',{'data_list':['发票', '海关缴款书', '代扣代缴', '农产品加计扣除发票信息', '农产品加计扣除海关文书', '异常发票']})
+```
+
+$\color{red}{在视图函数，使用json格式进行前后端的交互}$
+
+## 6.交互与响应
+
+```html
+from django.shortcuts import render,HttpResponse
+
+# Create your views here.
+def index(request):
+    return HttpResponse("返回内容
+```
 
 
+
+
+
+ 
