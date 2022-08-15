@@ -421,7 +421,7 @@ python manage.py migrate
 
 ##### 2.ORM之查询操作(查询集、过滤器)
 
-~~~tcl
+~~~python
 1.基本概念
     (1)查询集：表示从数据库中获取的模型对象集合(objects.),在管理器上调用过滤器方法会返回查询集
                查询集可以含有0个、一个或多个过滤器
@@ -521,6 +521,30 @@ from app01 import models
         # 因为从头到尾，无论该字段是否被修改都将数据的所有字段全部更新一边 
 ~~~
 
+#### 5.案例
 
+~~~python
+from django.db import models
+class Department(models.Model):
+    title = models.CharField(verbose_name="部门名称",max_length=32)
+
+class UserInfo(models.Model):
+    name = models.CharField(max_length=32,verbose_name="姓名")                        # primary_key = True
+    password = models.CharField(verbose_name="密码",max_length=64)                    # 修改表的时候，可以直接添加一行或去掉。
+    age = models.IntegerField(verbose_name="年龄")    # 默认为2
+    count = models.DecimalField(verbose_name="余额",max_digits=10,decimal_places=2,default=0)
+    create_time = models.DateTimeField(validators="入职时间")
+    # depart_id = models.BigIntegerField(verbose_name="部门id")
+    #设置外键
+    deaprt = models.ForeignKey(to="Department",to_fields="id",on_delete=models.CASCADE)
+    #on_delete 这是数据库外键定义的一个可选项，用来设置当主键表中的被参考列的数据发生变化时，外键表中响应字段的变换规则的。
+	"""
+on_update 和 on_delete 后面可以跟的词语有四个
+1. no action 表示 不做任何操作，
+2. set null 表示在外键表中将相应字段设置为null
+3. set default 表示设置为默认值
+4. cascade 表示级联操作，就是说，如果主键表中被参考字段更新，外键表中也更新，主键表中的记录被删除，外键表中改行也相应删除
+	"""
+~~~
 
  
