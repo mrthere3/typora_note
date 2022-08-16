@@ -482,11 +482,13 @@ $("#c2").remove()
 1. onclick()<!--==点击事件==-->
 
 ```javascript
-$(function{$("#id").onclik(funtion(){
-        var text = $(this).text()  //当前点击的标签
-		console.log(text)
-                });
-});
+    $(function(){
+        $("#savasucccess").onclick(function()
+        {
+            alert("提交成功")
+        }
+    )
+    })
 //$(function) 当页面框架加载完成开始执行函数
 ```
 
