@@ -549,6 +549,13 @@ on_update 和 on_delete 后面可以跟的词语有四个
 
 #####  7.5.1部门列表
 
++ ~~~html
+      <link rel="stylesheet"href="mydj/static/bootstrap/dist/css/bootstrap.min.css">
+      <script src="mydj/static/jquery/dist/jquery.js"></script>
+      <script src="mydj/static/bootstrap/dist/js/bootstrap.min.js"></script>
+  <!--加载静态资源导入规范，不然部分动态效果没办法实现-->
+  ~~~
+
 + 静态文件路径如图所示
 
 ![](https://cdn.jsdelivr.net/gh/mrthere3/typora_note/img/js/202208161405343.png)
@@ -567,7 +574,7 @@ on_update 和 on_delete 后面可以跟的词语有四个
   <head>
       <meta charset="UTF-8">
       <title>Title</title>
-      <link rel="stylesheet" type="text/css" href="{% static '/plugins/bootstrap-3.4.1-dist/css/bootstrap.min.css' %}"/>
+      <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}"/>
       <style>
           .navbar {
               border-radius: 0;
@@ -630,7 +637,7 @@ on_update 和 on_delete 后面可以跟的词语有四个
                               <h4 class="modal-title" id="exampleModalLabel">新建部门</h4>
                           </div>
                           <div class="modal-body">
-                              <form action="/depart/add/" method="post" onsubmit="return isempty()">
+                              <form action="/depart/add/" method="post" onsubmit="return isempty('#deparment-name')">
                                   {% csrf_token %}
                                   <div class="form-group">
                                       <label for="recipient-name" class="control-label">部门名称:</label>
@@ -669,11 +676,12 @@ on_update 和 on_delete 后面可以跟的词语有四个
                   <tbody>
                   {% for i in depart_list %}
                       <tr>
-                          <th scope="row">{{forloop.counter}}</th>
+                          <th scope="row">{{ start_index|add:forloop.counter }}</th>
                           <td>{{ i.title }}</td>
                           <td>
-                              <a class="btn-danger btn-xs" data-toggle="modal" data-target="#exampleModal2">编辑</a>
-                              <a class="btn-danger btn-xs" href="/depart/delete/?nid={{ i.id }}" target="_parent">删除</a>
+                              <a class="btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal2"
+                                 data-whatever="{{ i.title }}">编辑</a>
+                              <a class="btn-danger btn-sm" href="/depart/delete/?nid={{ i.id }}" target="_parent">删除</a>
                           </td>
                       </tr>
                   {% endfor %}
@@ -687,17 +695,22 @@ on_update 和 on_delete 后面可以跟的词语有四个
                                   <h4 class="modal-title" id="exampleModalLabel">部门名称编辑</h4>
                               </div>
                               <div class="modal-body">
-                                  <form action="post">
+                                  <form method="post" action="/depart/edit/" id="deaprt_edit" onsubmit="return isempty('#deparment-name1')">
+                                      {% csrf_token %}
                                       <div class="form-group">
-                                          <label for="recipient-name" class="control-label">新的部门名称</label>
-                                          <input type="text" class="form-control" id="recipient-name">
+                                          <label for="recipient-name" class="control-label">部门名称</label>
+                                          <input type="text" class="form-control" id="deparment-title"  readonly name="old_depart_name">
                                       </div>
-                                      <div class="modal-footer">
-                                          <button type="button" class="btn btn-default" data-dismiss="modal">关闭
-                                          </button>
-                                          <button type="button" class="btn btn-primary">提交</button>
+                                      <div class="form-group">
+                                          <label for="message-text" class="control-label">新部门名称</label>
+                                          <input class="form-control" id="deparment-name1" name="depart_name">
                                       </div>
                                   </form>
+                                  <div class="modal-footer">
+                                      <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                                      </button>
+                                      <button type="submit" class="btn btn-primary" form="deaprt_edit">提交</button>
+                                  </div>
                               </div>
   
                           </div>
@@ -709,201 +722,104 @@ on_update 和 on_delete 后面可以跟的词语有四个
       </div>
   </div>
   </body>
-  {#<link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">#}
-  {#<script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>#}
   <script src="{% static '/jquery/dist/jquery.js' %}"></script>
-  <script src="{% static '/plugins/bootstrap-3.4.1-dist/js/bootstrap.js' %}"></script>
+  <script src="{% static '/bootstrap/dist/js/bootstrap.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+  <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
   <script>
-      (function () {
-          window.alert = function (name) {
-              var iframe = document.createElement("IFRAME");
-              iframe.style.display = "none";
-              iframe.setAttribute("src", 'data:text/plain');
-              document.documentElement.appendChild(iframe);
-              window.frames[0].window.alert(name);
-              iframe.parentNode.removeChild(iframe);
+      function isempty(id) {
+          try {
+              var res = $(id).val();
+              var res2 = $("#message-text").val();
+              console.log(res, res2)
+              if ((res.length == 0) && (res2.length == 0)) {
+                  swal({title: "数据不能为空", type: "error", confirmButtonText: "确定"})
+                  return false
+              }
+              return true
+          } catch (error) {
+              console.log(error)
           }
-      })();
-  
-      function isempty() {
-          {#console.log($("button:contains('关闭')"))#}
-          {#$("button:contains('关闭')").onclick();#}
-          var res = $("#deparment-name").val();
-          var res2 = $("#message-text").val();
-          if ((res.length > 0) && (res2.length > 0)) {
-              let alertEle = <div class="alert alert-info" role="alert">提交成功</div>
-              $("body").append(alertEle)
-          } else {
-              alert("数据为空");
-              return false
-          }
-          return true
+      }
+  </script>
+  <script>
+      try {
+          $('#exampleModal2').on('show.bs.modal', function (event) {
+              var button = $(event.relatedTarget) // Button that triggered the modal
+              var recipient = button.data('whatever') // Extract info from data-* attributes
+              console.log(recipient)
+              // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+              // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+              var modal = $(this)
+              {#modal.find('.modal-title').text('New message to ' + recipient)#}
+              modal.find('.modal-body input:eq(1)').val(recipient)
+          })
+      }catch(error) {
+          console.log(error)
       }
   </script>
   </html>
   ~~~
   
-+ ~~~html
-  {% load static %}
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <title>Title</title>
-      <link rel="stylesheet" type="text/css" href="{% static '/plugins/bootstrap-3.4.1-dist/css/bootstrap.min.css' %}"/>
-      <style>
-          .navbar {
-              border-radius: 0;
-          }
-      </style>
-  
-  </head>
-  <body>
-  <nav class="navbar navbar-default">
-      <div class="container">
-          <!-- Brand and toggle get grouped for better mobile display -->
-          <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                      data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="#">联通用户管理 </a>
-          </div>
-  
-          <!-- Collect the nav links, forms, and other content for toggling -->
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-              <ul class="nav navbar-nav">
-                  <li class="active"><a href="#">部门管理 <span class="sr-only">(current)</span></a></li>
-                  <li><a href="#">用户管理</a></li>
-              </ul>
-              <ul class="nav navbar-nav navbar-right">
-                  <li><a href="#">登录</a></li>
-                  {#                    <li><a href="#">登出</a></li>#}
-                  {#                    <li><a href="#">Link</a></li>#}
-                  <li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                         aria-expanded="false">李洛克<span class="caret"></span></a>
-                      <ul class="dropdown-menu">
-                          <li><a href="#">个人资料 </a></li>
-                          <li><a href="#">我的信息</a></li>
-                          <li role="separator" class="divider"></li>
-                          <li><a href="#">注销</a></li>
-                      </ul>
-                  </li>
-              </ul>
-          </div><!-- /.navbar-collapse -->
-      </div><!-- /.container-fluid -->
-  </nav>
-  <div>
-      <div class="container">
-          <div style="margin-bottom: 10px">
-              <a class="btn btn-primary btn-success " data-toggle="modal" data-target="#exampleModal">
-                  <span class="glyphicon glyphicon-eject" aria-hidden="true"></span>
-                  新建部门</a>
-              <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-                   aria-labelledby="exampleModalLabel">
-                  <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                          <div class="modal-header">
-                              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                      aria-hidden="true">&times;</span></button>
-                              <h4 class="modal-title" id="exampleModalLabel">新建部门</h4>
-                          </div>
-                          <div class="modal-body">
-                              <form action="/depart/add/" method="post" onsubmit="return isempty()">
-                                  {% csrf_token %}
-                                  <div class="form-group">
-                                      <label for="recipient-name" class="control-label">部门名称:</label>
-                                      <input type="text" class="form-control" id="deparment-name" name="depart_name">
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="message-text" class="control-label">部门人员</label>
-                                      <textarea class="form-control" id="message-text" name="depart_length"></textarea>
-                                  </div>
-                                  <div class="modal-footer">
-                                      <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                                      <button type="submit" class="btn btn-primary">保存</button>
-                                  </div>
-                              </form>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          <div class="panel panel-default">
-              <!-- Default panel contents -->
-              <div class="panel-heading">
-                  <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-                  部门列表
-              </div>
-  
-              <!-- Table -->
-              <table class="table table-bordered">
-                  <thead>
-                  <tr>
-                      <th>ID</th>
-                      <th>名称</th>
-                      <th>操作</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {% for i in depart_list %}
-                      <tr>
-                          <th scope="row">{{ i.id }}</th>
-                          <td>{{ i.title }}</td>
-                          <td>
-                              <a class="btn-primary btn-xs">编剧</a>
-                              <a class="btn-danger btn-xs">删除 </a>
-                          </td>
-                      </tr>
-                  {% endfor %}
-                  </tbody>
-              </table>
-          </div>
-  </body>
-  <script src="{% static '/jquery/dist/jquery.js' %}"></script>
-  <script src="{% static '/plugins/bootstrap-3.4.1-dist/js/bootstrap.js' %}"></script>
-  <script>
-      function isempty(){
-          {#console.log($("button:contains('关闭')"))#}
-          {#$("button:contains('关闭')").onclick();#}
-          var res=$("#deparment-name").val();
-          var res2=$("#message-text").val();
-          if((res.length>0)&&(res2.length>0)){
-              alert("提交成功")
-          }else{
-              alert("数据为空");
-              return false
-          }
-          return true
-          }
-  
-  </script>
-  </html>
-  <!--用户通过弹窗进行部门添加以及对添加表单进行form校验-->
-  ~~~
-
 + ~~~python
+  import time
+  
+  from django.shortcuts import render,HttpResponse,redirect
+  from app01.models import Department
+  from django.contrib import messages
+  from django.core.paginator import Paginator
+  
+  # Create your views here.
+  def index(request):
+      return render(request,'index.html',{'data_list':['发票', '海关缴款书', '代扣代缴', '农产品加计扣除发票信息', '农产品加计扣除海关文书', '异常发票']})
+  #
   def depart_index(request):
+      index =1
+      page_size = 10
+      if request.method == "GET":
+          index = int(request.GET.get("index",1))
+          page_size = int(request.GET.get("pagesize",3))
       query_set = Department.objects.all()
+      paginator = Paginator(query_set, page_size)
+      try:
+          pages = paginator.page(index) # 可能请求的页数大于 实际分页数目
+      except:
+          index = paginator.num_pages #针对超出直接返回到最后一页数据
+          last = paginator.num_pages
+          pages = paginator.page(last)
       # print(query_set)
-      return render(request,"depart_list.html",{'depart_list':query_set})
-  #查询sql来进行数据展示
-  ~~~
-
-+ ~~~python
+      startindex = page_size*(index-1)
+      return render(request,"depart_list.html",{'depart_list':pages,"start_index":startindex})
+  
+  
   def depart_add(request):
-      # print(request.POST)
-      # print("表单依旧提交")
-      if request.method=="POST":
+      if request.method == "POST":
           depaer_ment=request.POST.get("depart_name")
-          Department.objects.create(title=depaer_ment)
+          depart_query = Department.objects.filter(title=depaer_ment)
+          if not depart_query:
+              Department.objects.create(title=depaer_ment)
+      # time.sleep(2)
       return redirect("/depart/list/")
-  #增加新的部门入库并且重定向回去 重新加载数据
+  
+  
+  def depart_delete(request):
+      print(request.path)
+      nid = request.GET.get("nid")
+      Department.objects.filter(id=nid).delete()
+      return redirect("/depart/list/")
+  
+  
+  def depart_edit(request):
+      if request.method =="POST":
+          print(request.POST)
+          odepart = request.POST.get("old_depart_name")
+          ndepart = request.POST.get("depart_name")
+          Department.objects.filter(title=odepart).update(title=ndepart)
+  
+      return redirect("/depart/list/")
+  
+  
   ~~~
-
+  
 + 
 
