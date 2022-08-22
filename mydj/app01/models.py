@@ -3,6 +3,8 @@ import datetime
 from django.db import models
 class Department(models.Model):
     title = models.CharField(verbose_name="部门名称",max_length=32)
+    def __str__(self):
+        return self.title
 
 class UserInfo(models.Model):
     name = models.CharField(max_length=32,verbose_name="姓名")                        # primary_key = True
@@ -13,7 +15,7 @@ class UserInfo(models.Model):
     # depart_id = models.BigIntegerField(verbose_name="部门id")
     #设置外键
     # deaprt = models.ForeignKey(to="Department",to_fields="id",on_delete=models.CASCADE,null=True,blank=True)
-    deaprt = models.ForeignKey(to="Department", to_field="id", on_delete=models.CASCADE,null=True)
+    deaprt = models.ForeignKey(to="Department", to_field="id", on_delete=models.CASCADE,null=True,verbose_name="所属部门")
     gener_choice = (
         (1,"男"),
         (2,"女")

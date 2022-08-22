@@ -1,11 +1,24 @@
 import time
 
+from django.http import JsonResponse
 from django.shortcuts import render,HttpResponse,redirect
-from app01.models import Department
+from app01.models import Department,UserInfo
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.forms import ModelForm
 
 # Create your views here.
+class userform(ModelForm):
+    class Meta:
+        model = UserInfo
+        fields ="__all__"
+        exclude = ["password"] #
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs = {"class":"form-control"}
+
 def index(request):
     return render(request,'index.html',{'data_list':['发票', '海关缴款书', '代扣代缴', '农产品加计扣除发票信息', '农产品加计扣除海关文书', '异常发票']})
 #
@@ -14,7 +27,7 @@ def depart_index(request):
     page_size = 10
     if request.method == "GET":
         index = int(request.GET.get("index",1))
-        page_size = int(request.GET.get("pagesize",3))
+        page_size = int(request.GET.get("pagesize",10))
     query_set = Department.objects.all()
     paginator = Paginator(query_set, page_size)
     try:
@@ -53,4 +66,27 @@ def depart_edit(request):
         Department.objects.filter(title=odepart).update(title=ndepart)
 
     return redirect("/depart/list/")
+
+
+def user_list(request):
+    user_list = UserInfo.objects.all()
+    mydjform = userform()
+    return render(request,"userinfo_list.html",{"form":mydjform,"user_list":user_list,"start_index":0})
+
+def user_add(request):
+    if request.method == "POST":
+        myform = userform(data=request.POST)
+        if myform.is_valid():
+            myform.save()
+            return JsonResponse({"msg":"处理完成"})
+        else:
+            print(myform.errors)
+            return JsonResponse({"msg":"处理失败 ","error_message":myform.errors})
+
+def user_delete(request):
+    # print(request.path)
+    nid = request.GET.get("nid")
+    UserInfo.objects.filter(id=nid).delete()
+    return redirect("/user/list/")
+
 

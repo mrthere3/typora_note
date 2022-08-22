@@ -18,10 +18,13 @@ from django.urls import path,re_path
 from app01 import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('depart/list/<int:index>/', views.depart_index),
+    path('depart/list/', views.depart_index),
     path('depart/add/', views.depart_add),
     path('depart/delete/', views.depart_delete),
     path('depart/edit/', views.depart_edit),
+    path('user/list/', views.user_list),
+    path('user/add/', views.user_add),
+    path('user/delete/', views.user_delete),
 
 
 ]

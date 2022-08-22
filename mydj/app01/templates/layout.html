@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}"/>
+    <style>
+        .navbar {
+            border-radius: 0;
+        }
+    </style>
+    {% endblock %}
+
+</head>
+<body>
+<nav class="navbar navbar-default">
+    {% block content %}
+    {% endblock %}
+</body>
+
+<script src="{% static '/jquery/dist/jquery.js' %}"></script>
+<script src="{% static '/bootstrap/dist/js/bootstrap.js' %}"></script>
+<script src="{% static '/jquery.cookie.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+<script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+{% block js %}
+<script>
+    function isempty(id) {
+        try {
+            var res = $(id).val();
+            var res2 = $("#message-text").val();
+            console.log(res, res2)
+            if ((res.length == 0) && (res2.length == 0)) {
+                swal({title: "数据不能为空", type: "error", confirmButtonText: "确定"})
+                return false
+            }
+            return true
+        } catch (error) {
+            console.log(error)
+        }
+    }
+</script>
+<script>
+    try {
+        $('#exampleModal2').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var recipient = button.data('whatever') // Extract info from data-* attributes
+            console.log(recipient)
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            {#modal.find('.modal-title').text('New message to ' + recipient)#}
+            modal.find('.modal-body input:eq(1)').val(recipient)
+        })
+    }catch(error) {
+        console.log(error)
+    }
+</script>
+{% endblock %}
+</html>
