@@ -60,7 +60,7 @@
                                 <span style="color: red"  id="{{ i.name }}"></span>
                                 {% endfor %}
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭</button>
                                     <button type="button" class="btn btn-primary" id="user_Add">保存</button>
                                 </div>
                             </form>
@@ -170,5 +170,8 @@ $("#user_Add").click(function(){
        }
    })
  })
+$("#user_remove").click(function (){
+    $(".modal-content span").text("")
+})
 </script>
 {% endblock %}

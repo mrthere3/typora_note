@@ -820,6 +820,138 @@ on_update 和 on_delete 后面可以跟的词语有四个
   
   
   ~~~
-  
-+ 
+
+##### 7.5.2模板继承
+
+~~~html
+#定义模板
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% block css %} #css模板
+        
+    {%endblock%}
+</head>
+<body>
+	<div>
+        {% block content %}
+        
+        {%endblock%}
+    </div>
+
+</body>
+    {% block js %} #js模板
+        
+    {%endblock%}
+</html>
+~~~
+
+​		继承模板
+
+~~~html
+{%extneds 'layout.html'%}
+
+{% block css %}  自己的css{%endblock%}
+{% block content %}
+
+{%endblock%}
+{% block js %}  自己的js{%endblock%}
+<!--继承或者自己重载相关-->
+~~~
+
++ ~~~python
+  deaprt = models.ForeignKey(to="Department", to_field="id", on_delete=models.CASCADE,null=True)
+  #depart 为两表关键外键
+  title = depart.object.filter(depart).title #获取关联表的属性
+  depart.object.filter(depart) #会直接帮你关联到另外一张表的对象
+  #django为我们封装好了 
+  ~~~
+
+##### 7.5.3 django 组件
+
+###### 	7.5.3.1django组件
+
+1. form组件
+2. modelform组件
+
+###### 	7.5.3.2 form组件
+
+~~~python
+class myform(django.form):
+    user = form.charField(weight=form.input)
+    
+def depart_edit(request):
+    form = myform() #实例化自己的表单对象
+    return render(requests,"/depart/list/",{"form":form})
+~~~
+
+前端
+
+~~~html
+<form>
+    {% for i in form %}
+    	{i} 或者 {i.user}
+    {endfor}i
+    
+</form>
+~~~
+
+$\color{red}{form组件会操成与model大量重复代码 不推荐使用}$
+
+###### 7.5.3.3   *modelform*组件
+
+~~~python
+class myfrom(modelform):
+    xx= form.chidel("") # 定义model没有的字段
+    class Meta:
+        model = userinfo
+        field ={"name","password","xx"}
+#前端用法与form组件相同
+from django.forms import widgets as wid  #因为重名，所以起个别名
+        widgets = {
+            "name":wid.TextInput(attrs={'class':'form-control'}),
+            "age":wid.NumberInput(attrs={'class':'form-control'}),
+            "email":wid.EmailInput(attrs={'class':'form-control'})
+        }
+  #简洁写法
+def __init__(self,*args,**kwargs):
+    super()__init(*args,**kwargs)
+    for name,field in self.fields.items():
+        field.wid.attrs = {'class':'form-control'})
+ #添加样式
+def depart_list(request):
+
+    if request.method == 'GET':
+        student_list = myform()
+        return render(request,'student.html',{'student_list':student_list})
+    else:
+        student_list = StudentList(request.POST)
+        if student_list.is_valid():
+            student_list.save()
+        return redirect(request,'student_list.html',{'student_list':student_list})
+  #保存数据的时候，不用挨个取数据了，只需要save一下。
+~~~
+
+~~~html
+<form>
+    {% for i in form %}
+    	{{i}} 或者 {{i.user}}
+    	{{i.label}} 显示数据库里面的verbose_name
+    {endfor}i
+    
+</form>
+
+~~~
+
+
+
+
+
+
+
+
+
+
 

@@ -69,6 +69,25 @@ def depart_edit(request):
 
 
 def user_list(request):
+    index = 1
+    page_size = 10
+    if request.method == "GET":
+        index = int(request.GET.get("index", 1))
+        page_size = int(request.GET.get("pagesize", 10))
+    query_set = UserInfo.objects.all()
+    paginator = Paginator(query_set, page_size)
+    try:
+        pages = paginator.page(index)  # 可能请求的页数大于 实际分页数目
+    except:
+        index = paginator.num_pages  # 针对超出直接返回到最后一页数据
+        last = paginator.num_pages
+        pages = paginator.page(last)
+    # print(query_set)
+    startindex = page_size * (index - 1)
+    depart_set = Department.objects.all()
+    return render(request, "user_list.html", {'user_list': pages, "start_index": startindex,"depart_list":depart_set})
+
+def user_list(request):
     user_list = UserInfo.objects.all()
     mydjform = userform()
     return render(request,"userinfo_list.html",{"form":mydjform,"user_list":user_list,"start_index":0})
