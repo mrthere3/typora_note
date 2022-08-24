@@ -562,4 +562,39 @@ $("#c2").remove()
    });
    ```
 
-   
+
+### 5.6*jquery*进行ajax请求
+
+~~~javascript
+var $ = require('jquery') 
+$.ajax({
+　　type:' ',//请求的方式，例如 GET或POST
+　　url：' ',//请求的 URL 地址
+　　data：' ',//这次请求要携带的数据
+　　success:function(res) { }//请求成功之后的回调函数　　
+})
+
+//GET 请求
+        $.ajax({
+          type: "GET",
+          url: "http://www.liulongbin.top:3006/api/getbooks",
+          // 如果不写参数就没必要写data  id
+          data: {
+            id: 1,
+          },
+          success: function (res) {
+            console.log(res);
+ // POST
+              $.ajax({
+                  type: "POST",
+                  url: "http://www.liulongbin.top:3006/api/addbook",
+                  data: {
+                      bookname: "史记",
+                      author: "司马迁",
+                      publisher: "上海图书出版社",
+                  },
+                  success: function (res) {
+                      console.log(res);
+                  },
+~~~
+

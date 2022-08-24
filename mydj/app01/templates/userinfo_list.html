@@ -117,19 +117,18 @@
                                 <h4 class="modal-title" id="exampleModalLabel">员工资料编辑</h4>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="/depart/edit/" id="user_edit" > <!--onsubmit="return isempty('#deparment-name1')-->
+                                <form method="post" action="/user/edit/" id="user_edit" novalidate> <!--onsubmit="return isempty('#deparment-name1')-->
                                     {% csrf_token %}
                               {% csrf_token %}
                                 {% for i in form %}
-                                <div>{{ i.label }}:{{ i }}</div>
+                                <div id="user_edit">{{ i.label }}:{{ i }}</div>
 {#                                <div></div>#}
-                                <span style="color: red"  id="{{ i.name }}_edit"></span>
+                                <span style="color: red"  id="{{ i.name }}_edit_error"></span>
                                 {% endfor %}
                                 </form>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭
-                                    </button>
-                                    <button type="submit" class="btn btn-primary" form="deaprt_edit">提交</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭</button>
+                                    <button type="button" class="btn btn-primary" form="user_edit" id="user_edit_submit">提交</button>
                                 </div>
                             </div>
 
@@ -155,12 +154,48 @@ $("#user_Add").click(function(){
            if (res.msg == "处理完成"){
                window.location.reload()
            }else {
-               {#console.log(res)#}
-               {#for(let obj of res.error_message){#}
-               {#    $("#error_msg:eq(this.index)").val(obj.0)#}
-               {##}
                for(let key in res.error_message){
                    $("#"+key+"_add").text(res.error_message[key])
+                    {#console.log(res.error_message[key])#}
+}
+           }
+
+       }
+   })
+ })
+
+function edit_info(id){
+       $.ajax({
+       type: 'GET',
+       url: '/user/edit/',
+       data: {"id": id},
+       dataType: 'json',
+       headers:{ "X-CSRFtoken":$.cookie("csrftoken")},
+       success: function (res) {
+                if (res.data_method == "get"){
+                    userinfo = JSON.parse(res.user_info)[0].fields
+                    for(let key in userinfo){
+                   $("div#user_edit input[id='id_"+key+"']").attr("value",userinfo[key])
+                   $("div#user_edit select[id='id_"+key+"'] option[value='"+userinfo[key]+"']").attr('selected',true)
+                    {#console.log(res.error_message[key])#}
+
+                }
+   }}})
+}
+
+$("#user_edit_submit").click(function(){
+   $.ajax({
+       type: 'POST',
+       url: '/user/edit/',
+       dataType: 'json',
+       data:$("#user_edit").serialize(),
+       headers:{ "X-CSRFtoken":$.cookie("csrftoken")},
+       success: function (res) {
+           if (res.msg == "处理完成"){
+               window.location.reload()
+           }else {
+               for(let key in res.error_message){
+                   $("#"+key+"_edit_error").text(res.error_message[key])
                     {#console.log(res.error_message[key])#}
 }
            }

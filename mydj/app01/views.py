@@ -6,6 +6,7 @@ from app01.models import Department,UserInfo
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.forms import ModelForm
+from django.core import serializers
 
 # Create your views here.
 class userform(ModelForm):
@@ -111,12 +112,24 @@ def user_delete(request):
 
 def user_edit(request):
     # print(request.path)
-    if request.method == "POST":
-        myform = userform(data=request.POST)
-        if myform.is_valid():
-            myform.save()
-            return JsonResponse({"msg":"处理完成"})
+    try:
+        if request.method == "POST":
+            print(request.POST)
+            myform = userform(data=request.POST)
+            if myform.is_valid():
+                user_info = UserInfo.objects.filter(name=request.POST.get("name"))
+                myform = userform(data=request.POST, instance=user_info.first())
+                myform.save(commit=True)
+                return JsonResponse({"msg":"处理完成"})
+            else:
+                print(myform.errors)
+                return JsonResponse({"msg":"处理失败","error_message":myform.errors})
         else:
-            print(myform.errors)
-            return JsonResponse({"msg":"处理失败 ","error_message":myform.errors})
+            # print(request.GET)
+            user_info = UserInfo.objects.filter(id=request.GET.get("id"))
+            user_json = serializers.serialize("json", user_info)
+            return JsonResponse({"msg":"处理完成","user_info":user_json,"data_method":"get"})
+    except Exception as e:
+        return JsonResponse({"msg": "处理失败","error_message":e})
+
 
