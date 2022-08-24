@@ -60,7 +60,7 @@ def depart_delete(request):
 
 def depart_edit(request):
     if request.method =="POST":
-        print(request.POST)
+        # print(request.POST)
         odepart = request.POST.get("old_depart_name")
         ndepart = request.POST.get("depart_name")
         Department.objects.filter(title=odepart).update(title=ndepart)
@@ -84,13 +84,14 @@ def user_list(request):
         pages = paginator.page(last)
     # print(query_set)
     startindex = page_size * (index - 1)
-    depart_set = Department.objects.all()
-    return render(request, "user_list.html", {'user_list': pages, "start_index": startindex,"depart_list":depart_set})
-
-def user_list(request):
-    user_list = UserInfo.objects.all()
+    # mydjform = userform(instance=UserInfo.objects.filter(name="王工").first())
     mydjform = userform()
-    return render(request,"userinfo_list.html",{"form":mydjform,"user_list":user_list,"start_index":0})
+    return render(request, "userinfo_list.html", {'user_list': pages, "start_index": startindex,"form":mydjform})
+
+# def user_list(request):
+#     user_list = UserInfo.objects.all()
+#     mydjform = userform()
+#     return render(request,"userinfo_list.html",{"form":mydjform,"user_list":user_list,"start_index":0})
 
 def user_add(request):
     if request.method == "POST":
@@ -108,4 +109,14 @@ def user_delete(request):
     UserInfo.objects.filter(id=nid).delete()
     return redirect("/user/list/")
 
+def user_edit(request):
+    # print(request.path)
+    if request.method == "POST":
+        myform = userform(data=request.POST)
+        if myform.is_valid():
+            myform.save()
+            return JsonResponse({"msg":"处理完成"})
+        else:
+            print(myform.errors)
+            return JsonResponse({"msg":"处理失败 ","error_message":myform.errors})
 

@@ -23,8 +23,8 @@
 <script src="{% static '/jquery/dist/jquery.js' %}"></script>
 <script src="{% static '/bootstrap/dist/js/bootstrap.js' %}"></script>
 <script src="{% static '/jquery.cookie.js' %}"></script>
-<link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
-<script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/sweet.css' %}">
+<script type="text/javascript" src="{% static '/sweet.js' %}"></script>
 {% block js %}
 <script>
     function isempty(id) {

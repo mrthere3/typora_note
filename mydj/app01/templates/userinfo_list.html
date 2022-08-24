@@ -57,7 +57,7 @@
                                 <div>{{ i.label }}:{{ i }}</div>
 
 {#                                <div></div>#}
-                                <span style="color: red"  id="{{ i.name }}"></span>
+                                <span style="color: red"  id="{{ i.name }}_add"></span>
                                 {% endfor %}
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭</button>
@@ -102,7 +102,7 @@
                         <td>{{ i.deaprt.title }}</td>
                         <td>
                             <a class="btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal2"
-                               data-whatever="{{ i }}">编辑</a>
+                               data-whatever="{{ i }}" id="user_edit" onclick="edit_info({{ i.id }})">编辑</a>
                             <a class="btn-danger btn-sm" href="/user/delete/?nid={{ i.id }}" target="_parent">删除</a>
                         </td>
                     </tr>
@@ -114,22 +114,20 @@
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title" id="exampleModalLabel">部门名称编辑</h4>
+                                <h4 class="modal-title" id="exampleModalLabel">员工资料编辑</h4>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="/depart/edit/" id="deaprt_edit" onsubmit="return isempty('#deparment-name1')">
+                                <form method="post" action="/depart/edit/" id="user_edit" > <!--onsubmit="return isempty('#deparment-name1')-->
                                     {% csrf_token %}
-                                    <div class="form-group">
-                                        <label for="recipient-name" class="control-label">部门名称</label>
-                                        <input type="text" class="form-control" id="deparment-title"  readonly name="old_depart_name">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="message-text" class="control-label">新部门名称</label>
-                                        <input class="form-control" id="deparment-name1" name="depart_name">
-                                    </div>
+                              {% csrf_token %}
+                                {% for i in form %}
+                                <div>{{ i.label }}:{{ i }}</div>
+{#                                <div></div>#}
+                                <span style="color: red"  id="{{ i.name }}_edit"></span>
+                                {% endfor %}
                                 </form>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭
                                     </button>
                                     <button type="submit" class="btn btn-primary" form="deaprt_edit">提交</button>
                                 </div>
@@ -162,7 +160,7 @@ $("#user_Add").click(function(){
                {#    $("#error_msg:eq(this.index)").val(obj.0)#}
                {##}
                for(let key in res.error_message){
-                   $("#"+key).text(res.error_message[key])
+                   $("#"+key+"_add").text(res.error_message[key])
                     {#console.log(res.error_message[key])#}
 }
            }
@@ -170,7 +168,8 @@ $("#user_Add").click(function(){
        }
    })
  })
-$("#user_remove").click(function (){
+
+$("#user_remove").click(function (){ //清楚错误数据
     $(".modal-content span").text("")
 })
 </script>
