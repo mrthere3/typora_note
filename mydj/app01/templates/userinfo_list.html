@@ -175,7 +175,7 @@ function edit_info(id){
                 if (res.data_method == "get"){
                     userinfo = JSON.parse(res.user_info)[0].fields
                     for(let key in userinfo){
-                   $("div#user_edit input[id='id_"+key+"']").attr("value",userinfo[key])
+                   $("div#user_edit input[id='id_"+key+"']").attr("placeholder",userinfo[key])
                    $("div#user_edit select[id='id_"+key+"'] option[value='"+userinfo[key]+"']").attr('selected',true)
                     {#console.log(res.error_message[key])#}
 
@@ -204,7 +204,7 @@ $("#user_edit_submit").click(function(){
    })
  })
 
-$("#user_remove").click(function (){ //清楚错误数据
+$(".btn-default").click(function (){ //清楚错误数据 id是唯一标识 如果要多个生效 要用clss进行定位
     $(".modal-content span").text("")
 })
 </script>
