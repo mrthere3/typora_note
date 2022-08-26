@@ -44,6 +44,12 @@ django-admin startproject projectname
 
 创建app
 
+~~~shell
+python manage.py startapp appname
+~~~
+
+
+
 ```python
 python manage.py startapp appname
 #文件结构如下图
@@ -357,6 +363,87 @@ python manage.py migrate
 ##### 1.orm用法与字段类型
 
 ~~~python
+ Meta 选项. 没有一个选项是必需的. 是否添加 class Meta 到你的 model 完全是可选的。
+
+1、db_table 
+本模块在数据库中对应的表的名字:
+
+db_table = "pizza_orders"
+
+若不提供该参数, Django 会使用 app_label + '_' + module_name 作为表的名字。
+
+若表的名字是一个 SQL 保留字, 或包含 Python 变量名不允许的字符--特别是连字符 --没关系. Django 会自动在幕后替你将列名字和表名字用引号引起来.
+
+2、get_latest_by 
+
+一个 DateField 或 DateTimeField 字段的名字. 若提供该选项, 该模块将拥有一个 get_latest() 函数以得到 "最新的" 对象(依据那个字段):
+
+get_latest_by = "order_date"。
+
+3、order_with_respect_to 
+
+将该对象标记为可按给定字段排序. This is almost always used with related objects to allow them to be ordered with respect to a parent object. 举例来说, 如果一个 PizzaToppping 关联到一个 Pizza 对象, 你可以使用:
+
+order_with_respect_to = 'pizza'
+
+这就允许 toppings 被排序to be ordered 关于相关的 pizza 对象
+
+4、ordering 
+
+默认排序字段及排序方式, 用于得到一个对象列表的任何场合:
+
+ordering = ['-order_date']
+
+这是一个 tuple 或一个字符串列表. 每个字符串是一个字段名带及一个可选的前缀 "-" , 这个前缀表示按降序排序(递减). 若没有这个前缀,则表示按升序排序.字符串 "?" 表示随机排序.
+
+举个例子, 要对 pub_date 字段以升序排列, 这样做:
+
+ordering = ['pub_date']
+
+要降序排列, 这样:
+
+ordering = ['-pub_date']
+
+要对 pub_date 降序,然后对 author 升序, 这样:
+
+ordering = ['-pub_date', 'author']
+
+注意一点,不论你使用了多少个字段排序, admin 只使用第一个字段.
+
+5、permissions 
+
+要创建一个对象所需要的额外的权限. 如果一个对象有 admin 设置, 则每个对象的添加,删除和改变权限会人(依据该选项)自动创建.下面这个例子指定了一个附加权限: can_deliver_pizzas:
+
+permissions = (("can_deliver_pizzas", "Can deliver pizzas"),)
+
+这是一个2-元素 tuple 的tuple或列表, 其中两2-元素 tuple 的格式为:(permission_code, human_readable_permission_name). 
+
+6、unique_together 
+
+unique_together = (("driver", "restaurant"),)
+
+这是一个字段列表的列表,这些字段的综合值必须是唯一的. 这会在 Django admin 层和数据库层同时做出限制(也就是相关的 UNIQUE 语句会被包括在 CREATE TABLE 语句中).
+
+7、verbose_name 
+
+是该对象的一个可读性更好的唯一名字:
+
+verbose_name = "pizza"
+
+若未提供该选项, Django 则会用一个类名字的 munged 版本来代替: CamelCase becomes camel case.
+
+8、erbose_name_plural 
+
+对象名字的复数:
+
+verbose_name_plural = "stories"
+
+若未提供该选项, Django 会使用 verbose_name + "s".
+~~~
+
+
+
+~~~python
 1.orm用法：属性名 = models.字段类型()
  
 2.常见字段类型
@@ -476,6 +563,9 @@ python manage.py migrate
         i.查询2020年1月1日后注册的成员
             from datetime import date
             usernames = models.User.objects.filter(pub_date__gt=date(2020,1,1))
+        h. 多条件查询
+        data = {"id"="3","moible"="123"}
+        usernames = models.User.objects.filter(**data)
 ~~~
 
 ~~~python
@@ -903,11 +993,6 @@ $\color{red}{form组件会操成与model大量重复代码 不推荐使用}$
 ###### 7.5.3.3   *modelform*组件
 
 ~~~python
-class myfrom(modelform):
-    xx= form.chidel("") # 定义model没有的字段
-    class Meta:
-        model = userinfo
-        field ={"name","password","xx"}
 #前端用法与form组件相同
 from django.forms import widgets as wid  #因为重名，所以起个别名
         widgets = {
@@ -921,10 +1006,20 @@ def __init__(self,*args,**kwargs):
     for name,field in self.fields.items():
         field.wid.attrs = {'class':'form-control'})
  #添加样式
+class userform(ModelForm):
+    class Meta:
+        model = UserInfo
+        fields ="__all__"
+        exclude = ["password"] #
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs = {"class":"form-control"}
 def depart_list(request):
 
     if request.method == 'GET':
-        student_list = myform()
+        student_list = userform()
         return render(request,'student.html',{'student_list':student_list})
     else:
         student_list = StudentList(request.POST)
@@ -932,6 +1027,20 @@ def depart_list(request):
             student_list.save()
         return redirect(request,'student_list.html',{'student_list':student_list})
   #保存数据的时候，不用挨个取数据了，只需要save一下。
+#在视图函数当中的 使用
+def user_add(request):
+    if request.method == "POST":
+        myform = userform(data=request.POST)
+        if myform.is_valid():
+            myform.save()
+            return JsonResponse({"msg":"处理完成"})
+        else:
+            print(myform.errors)
+            return JsonResponse({"msg":"处理失败 ","error_message":myform.errors})
+        #直接存储数据 或者修改数据 
+        myform = userform(data=request.POST, instance=user_info.first())
+        myform.save()
+        
 ~~~
 
 ~~~html
@@ -943,6 +1052,29 @@ def depart_list(request):
     
 </form>
 
+~~~
+
+#### 6. 案例二 靓号管理
+
+~~~python
+#正则校验手机号码
+from django.core.validators import RegexValidator
+class myfrom(modelform):
+    xx= form.chidel("") # 定义model没有的字段
+    moible = forms.CharField(
+    label = "手机号码"，validators=[RegexValidator(r"^159[0-9]+$",'号码必须以159开头 ')])
+"""    1.字段规则校验，字符长度，是否必填等基本校验
+    2.validators校验（RegexValidator校验器或自定义校验函数）
+    3.局部钩子（类中定义的以clean_字段名命名的函数，校验正常必须返回该字段的值self.cleaned_data.get(‘name’)）
+    4.全局钩子（类中定义的函数名clean，校验正常必须返回该对象的校验结果值return self.cleaned_data）
+    5.每一步通过校验单结果都以字典形式保存在类对象的cleaned_data属性中"""
+      def clean_city(self): # 局部钩子定义在modelform初始化的时候
+        """局部钩子判断城市必须是北京/上海/深圳其中一个"""
+        city_val = self.cleaned_data.get('city', '')
+        if city_val in ["北京", "上海", "深圳"]:
+            return city_val
+        else:
+            raise forms.ValidationError('城市只能选:北京/上海/深圳')
 ~~~
 
 

@@ -11,7 +11,7 @@ class UserInfo(models.Model):
     password = models.CharField(verbose_name="密码",max_length=64)                    # 修改表的时候，可以直接添加一行或去掉。
     age = models.IntegerField(verbose_name="年龄")    # 默认为2
     count = models.DecimalField(verbose_name="余额",max_digits=10,decimal_places=2,null=True)
-    create_time = models.DateTimeField(verbose_name="入职时间",auto_now=False,null=True)
+    create_time = models.DateField(verbose_name="入职时间",auto_now=False,null=True)
     # depart_id = models.BigIntegerField(verbose_name="部门id")
     #设置外键
     # deaprt = models.ForeignKey(to="Department",to_fields="id",on_delete=models.CASCADE,null=True,blank=True)
@@ -22,6 +22,7 @@ class UserInfo(models.Model):
     )
     #在django中进行约束
     gender = models.SmallIntegerField(verbose_name="性别",choices=gener_choice,null=True)
+
 
 
     # data = models.IntegerField(null=True, blank=True)           # 允许为空
