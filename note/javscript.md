@@ -180,7 +180,6 @@ tag.ppendChild(li) //将div标签下添加li标签
             }else {
                 alert("请输入内容")
             }
-
         }
     </script>
 
@@ -286,14 +285,12 @@ $\color{red}Dom还有很多语法，这只是了解，后续开发基本都是�
        $('.one+div')//选取class为one的下一个\<div>兄弟元素。
        ```
 
-       
-
     4. 兄弟元素选择器   
 
        ```javascript
-       $('#two~div')//选取Id为two的元素后面的所有\<div>兄弟元素。
+     $('#two~div')//选取Id为two的元素后面的所有\<div>兄弟元素。
        ```
-
+    
        
 
   + 多选择器
@@ -301,7 +298,7 @@ $\color{red}Dom还有很多语法，这只是了解，后续开发基本都是�
     ```javascript
     $(".c1 ,c2, a") //用逗号分割开
     ```
-
+  
 + 属性选择器
 
   ```javascript

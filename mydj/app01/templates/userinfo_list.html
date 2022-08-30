@@ -16,7 +16,7 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li ><a href="/depart/list/">部门管理 <span class="sr-only"></span></a></li>
+                <li><a href="/depart/list/">部门管理 <span class="sr-only"></span></a></li>
                 <li class="active"><a href="/user/list/">用户管理</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -34,178 +34,225 @@
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
-</nav>
-<div>
-    <div class="container">
-        <div style="margin-bottom: 10px">
-            <a class="btn btn-primary btn-success " data-toggle="modal" data-target="#exampleModal">
-                <span class="glyphicon glyphicon-eject" aria-hidden="true"></span>
-                新建人员</a>
-            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-                 aria-labelledby="exampleModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="exampleModalLabel">新建人员</h4>
-                        </div>
-                        <div class="modal-body">
-                            <form action="/user/add/" method="post" onsubmit="return  isempty('#deparment-name')" novalidate id="addform">
-                                {% csrf_token %}
-                                {% for i in form %}
-                                <div>{{ i.label }}:{{ i }}</div>
-
-{#                                <div></div>#}
-                                <span style="color: red"  id="{{ i.name }}_add"></span>
-                                {% endfor %}
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭</button>
-                                    <button type="button" class="btn btn-primary" id="user_Add">保存</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+    <div>
+        <div class="container">
+            <div style="margin-bottom: 10px" class="clearfix">
+                <a class="btn btn-primary btn-success " data-toggle="modal" data-target="#exampleModal">
+                    <span class="glyphicon glyphicon-eject" aria-hidden="true"></span>
+                    新建人员</a>
+                <div class="input-group" style="float: right;width: 300px">
+                    <input type="text" class="form-control" placeholder="Search for..." id="DT">
+                    <span class="input-group-btn">
+                <button class="btn btn-default" type="button">
+                    <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+                </button>
+              </span>
                 </div>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <!-- Default panel contents -->
-            <div class="panel-heading">
-                <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-                部门列表
-            </div>
-
-            <!-- Table -->
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                <th>id</th>
-                <th>姓名</th>
-                <th>年龄</th>
-                <th>性别</th>
-                <th>入职时间</th>
-                <th>账户余额</th>
-                <th>所属部门</th>
-                <th>操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for i in user_list %}
-                    <tr>
-                        <th scope="row">{{ start_index|add:forloop.counter }}</th>
-                        <td>{{ i.name }}</td>
-                        <td>{{ i.age }}</td>
-                        <td>{{ i.get_gender_display }}</td>
-                          <td>{{ i.create_time|date:'Y-m-d'}}</td>
-                        <td>{{ i.count }}</td>
-                        <td>{{ i.deaprt.title }}</td>
-                        <td>
-                            <a class="btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal2"
-                               data-whatever="{{ i }}" id="user_edit" onclick="edit_info({{ i.id }})">编辑</a>
-                            <a class="btn-danger btn-sm" href="/user/delete/?nid={{ i.id }}" target="_parent">删除</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog"
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
                      aria-labelledby="exampleModalLabel">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title" id="exampleModalLabel">员工资料编辑</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="exampleModalLabel">新建人员</h4>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="/user/edit/" id="user_edit" novalidate> <!--onsubmit="return isempty('#deparment-name1')-->
+                                <form action="/user/add/" method="post" onsubmit="return  isempty('#deparment-name')"
+                                      novalidate id="addform">
                                     {% csrf_token %}
-                              {% csrf_token %}
-                                {% for i in form %}
-                                <div id="user_edit">{{ i.label }}:{{ i }}</div>
-{#                                <div></div>#}
-                                <span style="color: red"  id="{{ i.name }}_edit_error"></span>
-                                {% endfor %}
+                                    {% for i in form %}
+                                        <div>{{ i.label }}:{{ i }}</div>
+                                        {#                                <div></div>#}
+                                        <span style="color: red" id="{{ i.name }}_add"></span>
+                                    {% endfor %}
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                                                id="user_remove">关闭
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="user_Add">保存</button>
+                                    </div>
                                 </form>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="user_remove">关闭</button>
-                                    <button type="button" class="btn btn-primary" form="user_edit" id="user_edit_submit">提交</button>
-                                </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
-                </tbody>
-            </table>
+            </div>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+                    部门列表
+                </div>
+
+                <!-- Table -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>姓名</th>
+                        <th>年龄</th>
+                        <th>性别</th>
+                        <th>入职时间</th>
+                        <th>账户余额</th>
+                        <th>所属部门</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in user_list %}
+                        <tr>
+                            <th scope="row">{{ start_index|add:forloop.counter }}</th>
+                            <td>{{ i.name }}</td>
+                            <td>{{ i.age }}</td>
+                            <td>{{ i.get_gender_display }}</td>
+                            <td>{{ i.create_time|date:'Y-m-d' }}</td>
+                            <td>{{ i.count }}</td>
+                            <td>{{ i.deaprt.title }}</td>
+                            <td>
+                                <a class="btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal2"
+                                   data-whatever="{{ i }}" id="user_edit" onclick="edit_info({{ i.id }})">编辑</a>
+                                <a class="btn-danger btn-sm" href="/user/delete/?nid={{ i.id }}" target="_parent">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog"
+                         aria-labelledby="exampleModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="exampleModalLabel">员工资料编辑</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" action="/user/edit/" id="user_edit" novalidate>
+                                        <!--onsubmit="return isempty('#deparment-name1')-->
+                                        {% csrf_token %}
+                                        {% csrf_token %}
+                                        {% for i in form %}
+                                            <div id="user_edit">{{ i.label }}:{{ i }}</div>
+                                            {#                                <div></div>#}
+                                            <span style="color: red" id="{{ i.name }}_edit_error"></span>
+                                        {% endfor %}
+                                    </form>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                                                id="user_remove">关闭
+                                        </button>
+                                        <button type="button" class="btn btn-primary" form="user_edit"
+                                                id="user_edit_submit">提交
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    </tbody>
+                </table>
+            </div>
+            <ul class="pagination">
+                <li>
+                    <a href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li><a href="?index=1">1</a></li>
+                <li><a href="?index=2">2</a></li>
+                <li><a href="?index=3">3</a></li>
+                <li><a href="?index=4">4</a></li>
+                <li><a href="?index=5">5</a></li>
+                <li>
+                    <a href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
         </div>
-    </div>
     </div>
 {% endblock %}
 {% block js %}
-<script>
-$("#user_Add").click(function(){
-   $.ajax({
-       type: 'POST',
-       url: '/user/add/',
-       dataType: 'json',
-       data:$("#addform").serialize(),
-       headers:{ "X-CSRFtoken":$.cookie("csrftoken")},
-       success: function (res) {
-           if (res.msg == "处理完成"){
-               window.location.reload()
-           }else {
-               for(let key in res.error_message){
-                   $("#"+key+"_add").text(res.error_message[key])
-                    {#console.log(res.error_message[key])#}
-}
-           }
-
-       }
-   })
- })
-
-function edit_info(id){
-       $.ajax({
-       type: 'GET',
-       url: '/user/edit/',
-       data: {"id": id},
-       dataType: 'json',
-       headers:{ "X-CSRFtoken":$.cookie("csrftoken")},
-       success: function (res) {
-                if (res.data_method == "get"){
-                    userinfo = JSON.parse(res.user_info)[0].fields
-                    for(let key in userinfo){
-                   $("div#user_edit input[id='id_"+key+"']").attr("placeholder",userinfo[key])
-                   $("div#user_edit select[id='id_"+key+"'] option[value='"+userinfo[key]+"']").attr('selected',true)
-                    {#console.log(res.error_message[key])#}
+    <script>
+        $("#user_Add").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: '/user/add/',
+                dataType: 'json',
+                data: $("#addform").serialize(),
+                headers: {"X-CSRFtoken": $.cookie("csrftoken")},
+                success: function (res) {
+                    if (res.msg == "处理完成") {
+                        window.location.reload()
+                    } else {
+                        for (let key in res.error_message) {
+                            $("#" + key + "_add").text(res.error_message[key])
+                            {#console.log(res.error_message[key])#}
+                        }
+                    }
 
                 }
-   }}})
-}
+            })
+        })
 
-$("#user_edit_submit").click(function(){
-   $.ajax({
-       type: 'POST',
-       url: '/user/edit/',
-       dataType: 'json',
-       data:$("#user_edit").serialize(),
-       headers:{ "X-CSRFtoken":$.cookie("csrftoken")},
-       success: function (res) {
-           if (res.msg == "处理完成"){
-               window.location.reload()
-           }else {
-               for(let key in res.error_message){
-                   $("#"+key+"_edit_error").text(res.error_message[key])
-                    {#console.log(res.error_message[key])#}
-}
-           }
+        function edit_info(id) {
+            $.ajax({
+                type: 'GET',
+                url: '/user/edit/',
+                data: {"id": id},
+                dataType: 'json',
+                headers: {"X-CSRFtoken": $.cookie("csrftoken")},
+                success: function (res) {
+                    if (res.data_method == "get") {
+                        userinfo = JSON.parse(res.user_info)[0].fields
+                        for (let key in userinfo) {
+                            $("div#user_edit input[id='id_" + key + "']").attr("placeholder", userinfo[key])
+                            $("div#user_edit select[id='id_" + key + "'] option[value='" + userinfo[key] + "']").attr('selected', true)
+                            {#console.log(res.error_message[key])#}
 
-       }
-   })
- })
+                        }
+                    }
+                }
+            })
+        }
 
-$(".btn-default").click(function (){ //清楚错误数据 id是唯一标识 如果要多个生效 要用clss进行定位
-    $(".modal-content span").text("")
-})
-</script>
+        $("#user_edit_submit").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: '/user/edit/',
+                dataType: 'json',
+                data: $("#user_edit").serialize(),
+                headers: {"X-CSRFtoken": $.cookie("csrftoken")},
+                success: function (res) {
+                    if (res.msg == "处理完成") {
+                        window.location.reload()
+                    } else {
+                        for (let key in res.error_message) {
+                            $("#" + key + "_edit_error").text(res.error_message[key])
+                            {#console.log(res.error_message[key])#}
+                        }
+                    }
+
+                }
+            })
+        })
+
+        $(".btn-default").click(function () { //清楚错误数据 id是唯一标识 如果要多个生效 要用clss进行定位
+            $(".modal-content span").text("")
+        })
+
+        $(".pagination li").mousedown(function () {
+            $(this).attr("class", "active")
+
+        })
+        $(function () {
+            $("input[name='create_time']").datetimepicker({
+                format: 'YYYY-MM-DD',			//显示年月日
+                language:"zh-CN",
+                startDate:'0',
+                autoclose:true,
+
+            });
+        });
+    </script>
 {% endblock %}

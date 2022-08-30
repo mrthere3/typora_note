@@ -53,10 +53,18 @@
 </nav>
 <div>
     <div class="container">
-        <div style="margin-bottom: 10px">
+        <div style="margin-bottom: 10px" class="clearfix">
             <a class="btn btn-primary btn-success " data-toggle="modal" data-target="#exampleModal">
                 <span class="glyphicon glyphicon-eject" aria-hidden="true"></span>
                 新建部门</a>
+            <div class="input-group" style="float: right;width: 300px">
+              <input type="text" class="form-control" placeholder="Search for...">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button">
+                    <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+                </button>
+              </span>
+            </div>
             <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
                  aria-labelledby="exampleModalLabel">
                 <div class="modal-dialog" role="document">

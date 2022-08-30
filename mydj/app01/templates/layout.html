@@ -6,6 +6,7 @@
     <title>Title</title>
     {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-datetimepicker/src/css/bootstrap-datetimepicker.css' %}"/>
     <style>
         .navbar {
             border-radius: 0;
@@ -18,10 +19,13 @@
 <nav class="navbar navbar-default">
     {% block content %}
     {% endblock %}
+</nav>
 </body>
 
 <script src="{% static '/jquery/dist/jquery.js' %}"></script>
 <script src="{% static '/bootstrap/dist/js/bootstrap.js' %}"></script>
+<script src="{% static 'bootstrap-datetimepicker/src/js/locales/bootstrap-datetimepicker.zh-CN.js' %}"></script>
+<script src="{% static 'bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.min.js' %}"></script>
 <script src="{% static '/jquery.cookie.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static '/sweet.css' %}">
 <script type="text/javascript" src="{% static '/sweet.js' %}"></script>

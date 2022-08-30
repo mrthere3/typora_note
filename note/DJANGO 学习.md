@@ -1061,13 +1061,14 @@ def user_add(request):
 from django.core.validators import RegexValidator
 class myfrom(modelform):
     xx= form.chidel("") # 定义model没有的字段
-    moible = forms.CharField(
-    label = "手机号码"，validators=[RegexValidator(r"^159[0-9]+$",'号码必须以159开头 ')])
-"""    1.字段规则校验，字符长度，是否必填等基本校验
+    moible = forms.CharField(label = "手机号码"，validators=[RegexValidator(r"^159[0-9]+$",'号码必须以159开头 ')])
+"""    
+	1.字段规则校验，字符长度，是否必填等基本校验
     2.validators校验（RegexValidator校验器或自定义校验函数）
     3.局部钩子（类中定义的以clean_字段名命名的函数，校验正常必须返回该字段的值self.cleaned_data.get(‘name’)）
     4.全局钩子（类中定义的函数名clean，校验正常必须返回该对象的校验结果值return self.cleaned_data）
-    5.每一步通过校验单结果都以字典形式保存在类对象的cleaned_data属性中"""
+    5.每一步通过校验单结果都以字典形式保存在类对象的cleaned_data属性中
+"""
       def clean_city(self): # 局部钩子定义在modelform初始化的时候
         """局部钩子判断城市必须是北京/上海/深圳其中一个"""
         city_val = self.cleaned_data.get('city', '')
@@ -1075,6 +1076,21 @@ class myfrom(modelform):
             return city_val
         else:
             raise forms.ValidationError('城市只能选:北京/上海/深圳')
+~~~
+
+~~~python
+#分页操作 
+from django.core.paginator import Paginator #导入分页类
+    query_set = Department.objects.all()
+    paginator = Paginator(query_set, page_size) #query_set model对象，page_size 每页数量
+    pages = paginator.page(index) # index 代表 pages是显示第几页
+    
+#json 格式化model对象
+from django.core import serializers
+from django.http import JsonResponse # 
+            user_info = UserInfo.objects.filter(id=request.GET.get("id"))
+            user_json = serializers.serialize("json", user_info) #会将查询到的modesl对象转换成json
+        return JsonResponse({"msg":"处理完成","user_info":user_json})
 ~~~
 
 
