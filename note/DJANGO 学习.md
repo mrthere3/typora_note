@@ -1054,7 +1054,7 @@ def user_add(request):
 
 ~~~
 
-#### 6. 案例二 靓号管理
+##### 7.6. 用户登录验证
 
 ~~~python
 #正则校验手机号码
@@ -1093,7 +1093,48 @@ from django.http import JsonResponse #
         return JsonResponse({"msg":"处理完成","user_info":user_json})
 ~~~
 
+###### cookie和session 设置
 
+1. 使用Django框架自带的"request.user.is_authenticated()"方法来判断用户是否登录
+
+~~~python
+if request.user.is_authenticated():
+	# 如果登录返回用户想去的页面
+	return render(request, "用户想去页面")
+else:
+	# 未登录, 重定向到用户登录页面
+	return redirect(reverse("登录页面"))
+~~~
+
+2. 使用Django自带的login_required装饰器(内部就是封装了is_authenticated())判断用户是否登录
+
+~~~python
+#1.需要在Django的settings配置文件中添加如果验证登录未通过需要跳转的路径
+from django.contrib.auth.decorators import login_required
+@login_required
+LOGIN_URL = "/login/"
+~~~
+
+cookie 和session设置
+
+~~~python
+request.session[] = "" #相当于是字典操作
+~~~
+
+前端ajax如何绕过ajdngo  csrf认证
+
+1. 读取浏览器cookie当中的csrf字段
+
+2. 忽略部分view 的csrf
+
+   ~~~python
+   from django.views.decorators.csrf import csrf_exempt
+   @csrf_exempt
+   def task(request)
+   #被装饰的函数将不会进行csrf认证
+   ~~~
+
+   
 
 
 
