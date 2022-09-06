@@ -144,7 +144,7 @@ tag.innerText=“哈哈
 ```javascript
 //创建标签<div></div>
 var tag= document.createElement("div")
-//内容修噶爱
+//内容修改
 tag.innerText = "123"
 li = document.creaateElement("li")
 tag.ppendChild(li) //将div标签下添加li标签
@@ -288,7 +288,7 @@ $\color{red}Dom还有很多语法，这只是了解，后续开发基本都是�
     4. 兄弟元素选择器   
 
        ```javascript
-     $('#two~div')//选取Id为two的元素后面的所有\<div>兄弟元素。
+        $('#two~div')//选取Id为two的元素后面的所有\<div>兄弟元素。
        ```
     
        

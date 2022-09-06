@@ -2,12 +2,13 @@ import time
 
 from django.http import JsonResponse
 from django.shortcuts import render,HttpResponse,redirect
-from app01.models import Department,UserInfo
+from app01.models import Department,UserInfo,Adminuser
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.forms import ModelForm
 from django.core import serializers
 from django.core.validators import RegexValidator
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 class userform(ModelForm):
@@ -21,9 +22,13 @@ class userform(ModelForm):
         for name, field in self.fields.items():
             field.widget.attrs = {"class":"form-control"}
 
-def index(request):
-    return render(request,'index.html',{'data_list':['发票', '海关缴款书', '代扣代缴', '农产品加计扣除发票信息', '农产品加计扣除海关文书', '异常发票']})
-#
+class loginrform(ModelForm):
+    class Meta:
+        model = Adminuser
+        fields ="__all__"
+        exclude = ["create_time"] #
+
+
 def depart_index(request):
     index =1
     page_size = 10
@@ -111,6 +116,7 @@ def user_delete(request):
     UserInfo.objects.filter(id=nid).delete()
     return redirect("/user/list/")
 
+@csrf_exempt
 def user_edit(request):
     # print(request.path)
     try:
@@ -132,5 +138,19 @@ def user_edit(request):
             return JsonResponse({"msg":"处理完成","user_info":user_json,"data_method":"get"})
     except Exception as e:
         return JsonResponse({"msg": "处理失败","error_message":e})
+
+def user_login(request):
+    if request.method == "GET":
+        return render(request,"admin-login.html")
+    else:
+        login_info = loginrform(request.post)
+        if login_info.is_valid():
+            admin_object = Adminuser.objects.filter(**login_info.cleaned_data).exists()
+            if admin_object:
+                request.user = admin_object.name
+                return redirect(request,"userinfo_list.html")
+            else:
+                return render(request,"admin-login.html",{'form':login_info})
+
 
 

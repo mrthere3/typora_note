@@ -6,6 +6,7 @@ class Department(models.Model):
     def __str__(self):
         return self.title
 
+
 class UserInfo(models.Model):
     name = models.CharField(max_length=32,verbose_name="姓名")                        # primary_key = True
     password = models.CharField(verbose_name="密码",max_length=64)                    # 修改表的时候，可以直接添加一行或去掉。
@@ -23,7 +24,13 @@ class UserInfo(models.Model):
     #在django中进行约束
     gender = models.SmallIntegerField(verbose_name="性别",choices=gener_choice,null=True)
 
-
+class Adminuser(models.Model):
+    name = models.CharField(max_length=64,verbose_name="用户名")
+    password = models.CharField(verbose_name="密码",max_length=128)
+    create_time = models.DateField(verbose_name="入职时间",auto_now=False,null=True)
+    class Meta():
+        db_table = "admin"
+        unique_together = (("name","password"))
 
     # data = models.IntegerField(null=True, blank=True)           # 允许为空
     # account = models.DecimalField(max_digits=10, decimal_places=2， default = 0)  # 总长度10位， 小数2位, 默认0.

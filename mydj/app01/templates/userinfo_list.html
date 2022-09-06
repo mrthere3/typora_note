@@ -222,10 +222,10 @@
                 url: '/user/edit/',
                 dataType: 'json',
                 data: $("#user_edit").serialize(),
-                headers: {"X-CSRFtoken": $.cookie("csrftoken")},
+                {#headers: {"X-CSRFtoken": $.cookie("csrftoken")},#}
                 success: function (res) {
                     if (res.msg == "处理完成") {
-                        window.location.reload()
+                        location.reload()
                     } else {
                         for (let key in res.error_message) {
                             $("#" + key + "_edit_error").text(res.error_message[key])
