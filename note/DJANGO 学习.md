@@ -504,6 +504,12 @@ verbose_name_plural = "stories"
     (3)字段的删(慎重)
 	   直接注释对应的字段然后执行数据库迁移的两条命令即可！
        注意：执行完毕之后字段对应的数据也都没有了
+6. values和 values_list
+        user_info = UserInfo.objects.filter(id=request.GET.get("id")).values("字段") 
+  # 规定 字段名的值返回为字典元素
+   valuise_list 规定的为元组
+                                     
+                                     
 ~~~
 
 ##### 2.ORM之查询操作(查询集、过滤器)
@@ -1088,9 +1094,13 @@ from django.core.paginator import Paginator #导入分页类
 #json 格式化model对象
 from django.core import serializers
 from django.http import JsonResponse # 
-            user_info = UserInfo.objects.filter(id=request.GET.get("id"))
-            user_json = serializers.serialize("json", user_info) #会将查询到的modesl对象转换成json
+	user_info = UserInfo.objects.filter(id=request.GET.get("id")).values("字段")
+    user_info = UserInfo.objects.filter(id=request.GET.get("id"))
+    user_json = serializers.serialize("json",user_info)
+      		
+        #会将查询到的modesl对象转换成json
         return JsonResponse({"msg":"处理完成","user_info":user_json})
+    #这边也可以不用serializers方法 用first()可以直接放进json中
 ~~~
 
 ###### cookie和session 设置

@@ -204,13 +204,13 @@
                 headers: {"X-CSRFtoken": $.cookie("csrftoken")},
                 success: function (res) {
                     if (res.data_method == "get") {
-                        userinfo = JSON.parse(res.user_info)[0].fields
-                        for (let key in userinfo) {
-                            $("div#user_edit input[id='id_" + key + "']").attr("placeholder", userinfo[key])
-                            $("div#user_edit select[id='id_" + key + "'] option[value='" + userinfo[key] + "']").attr('selected', true)
+                        var userinfo = res.user_info
+                        $.each(userinfo,function (key,value) {
+                            $("div#user_edit input[id='id_" + key + "']").attr("placeholder", value).attr("default", value)
+                            $("div#user_edit select[id='id_" + key + "'] option[value='" + value + "']").attr('selected', true)
                             {#console.log(res.error_message[key])#}
 
-                        }
+                        })
                     }
                 }
             })
@@ -227,10 +227,10 @@
                     if (res.msg == "处理完成") {
                         location.reload()
                     } else {
-                        for (let key in res.error_message) {
-                            $("#" + key + "_edit_error").text(res.error_message[key])
+                        $.each(res.error_message,function (index,value){
+                            $("#" + index + "_edit_error").text(value)
                             {#console.log(res.error_message[key])#}
-                        }
+                        })
                     }
 
                 }

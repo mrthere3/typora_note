@@ -130,13 +130,13 @@ def user_edit(request):
                 myform.save(commit=True)
                 return JsonResponse({"msg":"处理完成"})
             else:
-                print(myform.errors)
+                # print(myform.errors)
                 return JsonResponse({"msg":"处理失败","error_message":myform.errors})
         else:
             # print(request.GET)
-            user_info = UserInfo.objects.filter(id=request.GET.get("id"))
-            user_json = serializers.serialize("json", user_info)
-            return JsonResponse({"msg":"处理完成","user_info":user_json,"data_method":"get"})
+            user_info = UserInfo.objects.filter(id=request.GET.get("id")).values().first()
+            # user_json = serializers.serialize("json", user_info)
+            return JsonResponse({"msg":"处理完成","user_info":user_info,"data_method":"get"})
     except Exception as e:
         return JsonResponse({"msg": "处理失败","error_message":e})
 
