@@ -87,6 +87,9 @@ python manage.py startapp appname
 
 ![](https://cdn.jsdelivr.net/gh/mrthere3/typora_note/img/js/202208051528185.png)
 
+1. 路由系统复杂多变，也可以通过include（“app.urls”）,将连接通往子路由系统
+2.  re_path()可以帮助我们匹配更加复杂的路由规则包含正则表达式。
+
 ### 编写视图函数views.index
 
 ![](https://cdn.jsdelivr.net/gh/mrthere3/typora_note/img/js/202208051530473.png)
@@ -1016,7 +1019,7 @@ class userform(ModelForm):
     class Meta:
         model = UserInfo
         fields ="__all__"
-        exclude = ["password"] #
+        exclude = ["password"] 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1144,7 +1147,123 @@ request.session[] = "" #相当于是字典操作
    #被装饰的函数将不会进行csrf认证
    ~~~
 
+
+## 8. *Django*路由与视图详解
+
+### 8.1 path 与 re_path 路由函数
+
+re_path函数对比path，可以实现更加复杂的正则表达式路由规则
+
+~~~python
+path（'app2/<uuid:id>',view.show_uuid,name="show_uuid"）
+"""
+path 正则参数
+ str : 任意非空字符，不包含“/”,默认类型
+ int : 匹配0和任意整数
+ slug ：匹配任意ASCⅡ字符、连接线和下划线
+ uuid ： 匹配一个uuid格式的字符串，该对象必须包含“-”，所有字母必须小写。比如22221111-abcd-3cww-3321-123456789123
+"""
+
+re_path('app2/list/(?<year>\d{4})/',view.article.list)
+"""
+所用规则与正则表达式无差别
+"""
+此上两种方法关键参数都是在<>中
+path(<type:type>)
+re_path('(?<name>\d{4})')
+
+~~~
+
+### 8.2 反向路由解析器
+
+~~~python
+path（'app2/<uuid:id>',view.show_uuid,name="show_uuid"）
+~~~
+
+name可以在HTML中使用，根据name得到url地址。好处是name不变，url可以随意修改。
+
+reverse() 方法 可以根据name 反向解析出这个name代表的URL
+
+### 8.3 视图函数的底层处理
+
+1. HttpRequest 和 HttpResponse 对象
+   ~~~python
+   # HttpRequest对象
+   path  字符串，便是请求页面的路径，不包含域名
+   method 字符串，表示页面请求的方式。必须以大写方式
+   encoding 字符串，表示提交的数据的编码方式
+   GET 字典类型，包含GET请求方法中的所有参数
+   POSt 字典类型，包含POSt请求方法中的所有参数
+   FILE 字典类型，包含上传文件的信息
+   COOKIES 字典类型，包含所有的cookie对象
+   session 字典类型，表示当前会话
+   META 字典类型，包含所有的HTTP头部信息，如HTTP_USER_AGENT、REMOTE_ADDR
+   user 表示当前登录用户
    
+   ~~~
+
+2. HttpResposne 
+   ~~~python
+   """
+   常见参数
+   content 返回的内容
+   status_code 返回的HTTP响应状态吗
+   content-type 返回的数据的MIME类型，默认为text/html
+   """
+   
+   ~~~
+
+### 8.4 视图处理函数的使用
+
+1.  render()函数
+   ~~~python
+   from django.shortcts import render
+   render(request,template_name,content=None,content_type=None,status=None，using=None)
+   """
+   content: 字典类型，保存要传到html的变量
+   status: 表示响应的状态代码，默认为200
+   content_type: 用于生成文档的MIME类型，默认为text/html
+   using：设置末班引擎，用于解析模板文件
+   """
+   ~~~
+
+2. redict()函数
+   重定向的三种方式
+
+   1. 通过调用模板的get_absolute_url()函数
+      ~~~python
+      class UserInfo(models.Model):
+          name=models.CharField(max_length=32)                        # primary_key = True
+          password = models.CharField(max_length=64)                    # 修改表的时候，可以直接添加一行或去掉。 
+          age = models.IntegerField(default=2)  
+          def get_absolute_url(self):
+              return reverse("url",kwargs={'id':"self.id"})
+      ~~~
+
+      
+
+   2. 通过路由反向解析进行重定向
+      ~~~python
+      def test_redict_view(request,id):
+          return redirect("url",id)
+      ~~~
+
+   3. 通过绝对的或者相对的url进行重定向
+      ~~~python
+      return redirect("https://")
+      ~~~
+
+      
+
+   
+
+   
+
+
+
+### 
+
+
 
 
 
