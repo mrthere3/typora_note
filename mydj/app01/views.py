@@ -1,5 +1,6 @@
 import time
 
+import requests
 from django.http import JsonResponse
 from django.shortcuts import render,HttpResponse,redirect
 from app01.models import Department,UserInfo,Adminuser
@@ -10,7 +11,8 @@ from django.core import serializers
 from django.core.validators import RegexValidator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 # Create your views here.
 class userform(ModelForm):
     class Meta:
@@ -153,5 +155,21 @@ def user_login(request):
             else:
                 return render(request,"admin-login.html",{'form':login_info})
 
-
+@csrf_exempt
+def user_regiest(request):
+    if request.method == "GET":
+        return render(request,"admin-regiests.html")
+    else:
+        print(request.POST)
+        name = request.POST.get("name")
+        pwd = request.POST.get("password")
+        if User.objects.filter(username=name):
+            info = "用户已经存在"
+        else:
+            d = dict(username=name, password=pwd, email='111@111.com', is_staff=1, is_active=1, is_superuser=1)
+            user = User.objects.create_user(**d)
+            info = '注册成功,请登陆'
+            # 跳转到登陆页面
+            # return redirect(reverse("app6:user_login"))
+            return render(request,"admin-regiests.html",{"info":info})
 
