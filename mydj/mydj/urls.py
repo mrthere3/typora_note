@@ -22,11 +22,12 @@ urlpatterns = [
     path('depart/add/', views.depart_add),
     path('depart/delete/', views.depart_delete),
     path('depart/edit/', views.depart_edit),
-    path('user/list/', views.user_list),
+    path('user/list/', views.user_list, name="userlist"),
     path('user/add/', views.user_add),
     path('user/delete/', views.user_delete),
     path('user/edit/', views.user_edit),
-    path('user/login/', views.user_login,name="login"),
-    path('user/regiest/', views.user_regiest,name="regiests"),
+    path('user/login/', views.user_login, name="login"),
+    path('user/regiest/', views.user_regiest, name="regiests"),
+    path('', views.user_login, name="home"),
 
 ]

@@ -1,90 +1,119 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        body {
-            background: url('https://cdn.pixabay.com/photo/2018/08/14/13/23/ocean-3605547_1280.jpg') no-repeat;
-            background-size: 100% 130%;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户注册</title>
+  <style>
+    body {
+      background: url('https://cdn.pixabay.com/photo/2018/08/14/13/23/ocean-3605547_1280.jpg') no-repeat;
+      background-size: 100% 130%;
+    }
 
-        #login_box {
-            width: 20%;
-            height: 400px;
-            background-color: #00000060;
-            margin: auto;
-            margin-top: 10%;
-            text-align: center;
-            border-radius: 10px;
-            padding: 50px 50px;
-        }
+    #login_box {
+      width: 20%;
+      height: 400px;
+      background-color: #00000060;
+      margin: auto;
+      margin-top: 10%;
+      text-align: center;
+      border-radius: 10px;
+      padding: 50px 50px;
+    }
 
-        h2 {
-            color: #ffffff90;
-            margin-top: 5%;
-        }
+    h2 {
+      color: #ffffff90;
+      margin-top: 5%;
+    }
 
-        #input-box {
-            margin-top: 5%;
-        }
+    #input-box {
+      margin-top: 5%;
+    }
 
-        span {
-            color: #fff;
-        }
+    span {
+      color: #fff;
+    }
 
-        input {
-            border: 0;
-            width: 60%;
-            font-size: 15px;
-            color: #fff;
-            background: transparent;
-            border-bottom: 2px solid #fff;
-            padding: 5px 10px;
-            outline: none;
-            margin-top: 10px;
-        }
+    input {
+      border: 0;
+      width: 60%;
+      font-size: 15px;
+      color: #fff;
+      background: transparent;
+      border-bottom: 2px solid #fff;
+      padding: 5px 10px;
+      outline: none;
+      margin-top: 10px;
+    }
 
-        button {
-            margin-top: 50px;
-            width: 60%;
-            height: 30px;
-            border-radius: 10px;
-            border: 0;
-            color: #fff;
-            text-align: center;
-            line-height: 30px;
-            font-size: 15px;
-            background-image: linear-gradient(to right, #30cfd0, #330867);
-        }
+    button {
+      margin-top: 50px;
+      width: 60%;
+      height: 30px;
+      border-radius: 10px;
+      border: 0;
+      color: #fff;
+      text-align: center;
+      line-height: 30px;
+      font-size: 15px;
+      background-image: linear-gradient(to right, #30cfd0, #330867);
+    }
 
-        #sign_up {
-            margin-top: 45%;
-            margin-left: 60%;
-        }
+    #sign_up {
+      margin-top: 45%;
+      margin-left: 60%;
+    }
 
-        a {
-            color: #b94648;
-        }
-    </style>
+    a {
+      color: #b94648;
+    }
+  </style>
 </head>
 
 <body>
-<div id="login_box">
-    <h2>LOGIN</h2>
-    <form action="/user/login/" method="post">
-        {% csrf_token %}
-        <div id="input_box">
-            <input type="text" value="name" placeholder="请输入用户名" style="position: absolute">
-            <span></span>
-        </div>
+  <div id="login_box">
+          <form action="{% url 'login' %}" method="post" id="login-box">
+              {% csrf_token %}
+                <h2>登录</h2>
+                <div id="input_box">
+                  <input type="text" placeholder="请输入用户名" name="name">
+                </div>
+                <div class="input_box">
+                  <input type="password" placeholder="请输入密码" name="password">
+                </div>
+               <div class="col-md-8" style="margin-top: 5%;color: #00b3ee">
+                   <label for="agreeTerms" >
+                       {{ info }}
+                   </label>
+               </div>
+          </form>
+        <button type="submit" form="login-box">登录</button><br>
         <div class="input_box">
-            <input type="password" value="password" placeholder="请输入密码">
+            <a href="{% url 'regiests' %}" target="_parent">
+                <button type="button" style="margin-top: 10px">注册</button><br>
+            </a>
         </div>
-        <button type="submit">登录</button><br>
-    </form>
-</div>
+  </div>
 </body>
 </html>
+{#<script src="{% static '/jquery/dist/jquery.js' %}"></script>#}
+{#<script src="{% static '/jquery.cookie.js' %}"></script>#}
+{#<script src="{% static '/bootstrap/dist/js/bootstrap.js' %}"></script>#}
+{#<script src="{% static 'bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.min.js' %}"></script>#}
+{#<script>#}
+{#        function regiest() {#}
+{#            $.ajax({#}
+{#                type: 'POST',#}
+{#                url:"{% url 'regiests' %}" ,#}
+{#                data: $("#regiest-box").serialize(),#}
+{#                dataType: 'json',#}
+{#                success: function (res) {#}
+{#                    if (res.status === 200) {#}
+{#                        $(".col-md-8 label").val("text",res.info)#}
+{#                    }#}
+{#                }#}
+{#            })#}
+{#        }#}
+{#</script>#}

@@ -12,7 +12,9 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+
+
 # Create your views here.
 class userform(ModelForm):
     class Meta:
@@ -146,16 +148,23 @@ def user_login(request):
     if request.method == "GET":
         return render(request,"admin-login.html")
     else:
-        login_info = loginrform(request.post)
-        if login_info.is_valid():
-            admin_object = Adminuser.objects.filter(**login_info.cleaned_data).exists()
-            if admin_object:
-                request.user = admin_object.name
-                return redirect(request,"userinfo_list.html")
+        name = request.POST.get("name")
+        pwd = request.POST.get("password")
+        if User.objects.filter(username=name):
+            user = authenticate(username=name, password=pwd)
+            if user:
+                if user.is_active:
+                    login(request,user)
+                    return redirect("userlist")
+                else:
+                    info = "账户还没有激活"
             else:
-                return render(request,"admin-login.html",{'form':login_info})
+                info = "账号密码不对，请重新输入"
+        else:
+            info = "账户不存在，请查询"
+        return render(request,"admin-login.html",{"info":info})
 
-@csrf_exempt
+# @csrf_exempt
 def user_regiest(request):
     if request.method == "GET":
         return render(request,"admin-regiests.html")
@@ -163,13 +172,14 @@ def user_regiest(request):
         print(request.POST)
         name = request.POST.get("name")
         pwd = request.POST.get("password")
+        email = request.POST.get("email")
         if User.objects.filter(username=name):
             info = "用户已经存在"
         else:
-            d = dict(username=name, password=pwd, email='111@111.com', is_staff=1, is_active=1, is_superuser=1)
+            d = dict(username=name, password=pwd, email=email, is_staff=1, is_active=1, is_superuser=1)
             user = User.objects.create_user(**d)
             info = '注册成功,请登陆'
             # 跳转到登陆页面
             # return redirect(reverse("app6:user_login"))
-            return render(request,"admin-regiests.html",{"info":info})
+            return render(request,"admin-login.html",{"info":info})
 
