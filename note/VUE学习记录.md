@@ -3,8 +3,7 @@
 ## 快速原型开发（单个vue文件调试）
 
 1. ~~~vue
-   npm install -g vue-cli
-   npm i -g @vue/compiler-sfc
+   npm install -g vue-cli@4.0
    ~~~
    
 2. ~~~vue
@@ -16,7 +15,7 @@
    ~~~
 
 4.  ~~~vue
-    npm install vue-template-compiler -g
+    npm install vue-template-compiler 
     ~~~
 
 5. 创建文件夹并创建单个vue组件 test.vue
