@@ -1,4 +1,4 @@
-# *VUE*学习记录
+# *VUE*单文件调试
 
 ## 快速原型开发（单个vue文件调试）
 
@@ -707,3 +707,428 @@ export default {
 ~~~
 
 但有时我们可能希望将该值绑定到当前组件实例上的动态数据。这可以通过使用 `v-bind` 来实现。此外，使用 `v-bind` 还使我们可以将选项值绑定为非字符串的数据类型。
+
+#### 复选框
+
+~~~vue
+<input
+  type="checkbox"
+  v-model="toggle"
+  true-value="yes"
+  false-value="no" />
+
+~~~
+
+`true-value` 和 `false-value` 是 Vue 特有的 attributes，仅支持和 `v-model` 配套使用。这里 `toggle` 属性的值会在选中时被设为 `'yes'`，取消选择时设为 `'no'`。你同样可以通过 `v-bind` 将其绑定为其他动态值：
+
+~~~vue
+<input
+  type="checkbox"
+  v-model="toggle"
+  :true-value="dynamicTrueValue"
+  :false-value="dynamicFalseValue" />
+
+~~~
+
+#### 单选按钮
+
+~~~vue
+<input type="radio" v-model="pick" :value="first" />
+<input type="radio" v-model="pick" :value="second" />
+
+~~~
+
+`pick` 会在第一个按钮选中时被设为 `first`，在第二个按钮选中时被设为 `second`。
+
+#### 选择器选项
+
+~~~vue
+<select v-model="selected">
+  <!-- 内联对象字面量 -->
+  <option :value="{ number: 123 }">123</option>
+</select>
+
+~~~
+
+`v-model` 同样也支持非字符串类型的值绑定！在上面这个例子中，当某个选项被选中，`selected` 会被设为该对象字面量值 `{ number: 123 }`。
+
+#### 修饰符
+
+##### `.lazy`
+
+默认情况下，`v-model` 会在每次 `input` 事件后更新数据 ([IME 拼字阶段的状态](https://cn.vuejs.org/guide/essentials/forms.html#vmodel-ime-tip)例外)。你可以添加 `lazy` 修饰符来改为在每次 `change` 事件后更新数据：
+
+~~~vue
+<!-- 在 "change" 事件后同步更新而不是 "input" -->
+<input v-model.lazy="msg" />
+
+~~~
+
+##### `.number`
+
+如果你想让用户输入自动转换为数字，你可以在 `v-model` 后添加 `.number` 修饰符来管理输入：
+
+~~~vue
+<input v-model.number="age" />
+~~~
+
+如果该值无法被 `parseFloat()` 处理，那么将返回原始值。
+
+`number` 修饰符会在输入框有 `type="number"` 时自动启用。
+
+##### `.trim`
+
+如果你想要默认自动去除用户输入内容中两端的空格，你可以在 `v-model` 后添加 `.trim` 修饰符：
+
+~~~vue
+<input v-model.trim="msg" />
+~~~
+
+## 生命周期钩子
+
+每个 Vue 组件实例在创建时都需要经历一系列的初始化步骤，比如设置好数据侦听，编译模板，挂载实例到 DOM，以及在数据改变时更新 DOM。在此过程中，它也会运行被称为生命周期钩子的函数，让开发者有机会在特定阶段运行自己的代码。
+
+### 注册周期钩子
+
+举例来说，`mounted` 钩子可以用来在组件完成初始渲染并创建 DOM 节点后运行代码：
+
+~~~js
+export default {
+  mounted() {
+    console.log(`the component is now mounted.`)
+  }
+}
+~~~
+
+还有其他一些钩子，会在实例生命周期的不同阶段被调用，最常用的是 [`mounted`](https://cn.vuejs.org/api/options-lifecycle.html#mounted)、[`updated`](https://cn.vuejs.org/api/options-lifecycle.html#updated) 和 [`unmounted`](https://cn.vuejs.org/api/options-lifecycle.html#unmounted)。
+
+所有生命周期钩子函数的 `this` 上下文都会自动指向当前调用它的组件实例。注意：避免用箭头函数来定义生命周期钩子，因为如果这样的话你将无法在函数中通过 `this` 获取组件实例。
+
+下面是实例生命周期的图表。你现在并不需要完全理解图中的所有内容，但以后它将是一个有用的参考。
+
+![生命周期图示](https://cn.vuejs.org/assets/lifecycle.16e4c08e.png)
+
+## 侦听器
+
+### 基本示例
+
+计算属性允许我们声明性地计算衍生值。然而在有些情况下，我们需要在状态变化时执行一些“副作用”：例如更改 DOM，或是根据异步操作的结果去修改另一处的状态。
+
+在选项式 API 中，我们可以使用 [`watch` 选项](https://cn.vuejs.org/api/options-state.html#watch)在每次响应式属性发生变化时触发一个函数。
+
+~~~js
+export default {
+  data() {
+    return {
+      question: '',
+      answer: 'Questions usually contain a question mark. ;-)'
+    }
+  },
+  watch: {
+    // 每当 question 改变时，这个函数就会执行
+    question(newQuestion, oldQuestion) {
+      if (newQuestion.includes('?')) {
+        this.getAnswer()
+      }
+    }
+  },
+  methods: {
+    async getAnswer() {
+      this.answer = 'Thinking...'
+      try {
+        const res = await fetch('https://yesno.wtf/api')
+        this.answer = (await res.json()).answer
+      } catch (error) {
+        this.answer = 'Error! Could not reach the API. ' + error
+      }
+    }
+  }
+}
+
+<p>
+  Ask a yes/no question:
+  <input v-model="question" />
+</p>
+<p>{{ answer }}</p>
+
+
+~~~
+
+----
+
+### 深层侦听器
+
+`watch` 默认是浅层的：被侦听的属性，仅在被赋新值时，才会触发回调函数——而嵌套属性的变化不会触发。如果想侦听所有嵌套的变更，你需要深层侦听器：
+
+~~~js
+export default {
+  watch: {
+    someObject: {
+      handler(newValue, oldValue) {
+        // 注意：在嵌套的变更中，
+        // 只要没有替换对象本身，
+        // 那么这里的 `newValue` 和 `oldValue` 相同
+      },
+      deep: true
+    }
+  }
+}
+
+~~~
+
+----
+
+### 即时回调的侦听器
+
+`watch` 默认是懒执行的：仅当数据源变化时，才会执行回调。但在某些场景中，我们希望在创建侦听器时，立即执行一遍回调。举例来说，我们想请求一些初始数据，然后在相关状态更改时重新请求数据。
+
+我们可以用一个对象来声明侦听器，这个对象有 `handler` 方法和 `immediate: true` 选项，这样便能强制回调函数立即执行：
+
+~~~js
+export default {
+  // ...
+  watch: {
+    question: {
+      handler(newQuestion) {
+        // 在组件实例创建时会立即调用
+      },
+      // 强制立即执行回调
+      immediate: true
+    }
+  }
+  // ...
+}
+
+~~~
+
+### 回调的触发时机
+
+当你更改了响应式状态，它可能会同时触发 Vue 组件更新和侦听器回调。
+
+默认情况下，用户创建的侦听器回调，都会在 Vue 组件更新**之前**被调用。这意味着你在侦听器回调中访问的 DOM 将是被 Vue 更新之前的状态。
+
+如果想在侦听器回调中能访问被 Vue 更新**之后**的DOM，你需要指明 `flush: 'post'` 选项：
+
+~~~js
+export default {
+  // ...
+  watch: {
+    key: {
+      handler() {},
+      flush: 'post'
+    }
+  }
+}
+
+~~~
+
+### `this.$watch()`
+
+我们也可以使用组件实例的 [`$watch()` 方法](https://cn.vuejs.org/api/component-instance.html#watch)来命令式地创建一个侦听器：
+
+~~~js
+export default {
+  created() {
+    this.$watch('question', (newQuestion) => {
+      // ...
+    })
+  }
+}
+
+~~~
+
+如果要在特定条件下设置一个侦听器，或者只侦听响应用户交互的内容，这方法很有用。它还允许你提前停止该侦听器。
+
+### 停止侦听器
+
+用 `watch` 选项或者 `$watch()` 实例方法声明的侦听器，会在宿主组件卸载时自动停止。因此，在大多数场景下，你无需关心怎么停止它。
+
+在少数情况下，你的确需要在组件卸载之前就停止一个侦听器，这时可以调用 `$watch()` API 返回的函数：
+
+~~~js
+const unwatch = this.$watch('foo', callback)
+
+// ...当该侦听器不再需要时
+unwatch()
+
+~~~
+
+## 模板引用
+
+虽然 Vue 的声明性渲染模型为你抽象了大部分对 DOM 的直接操作，但在某些情况下，我们仍然需要直接访问底层 DOM 元素。要实现这一点，我们可以使用特殊的 `ref` attribute：
+
+~~~vue
+<input ref="input">
+~~~
+
+`ref` 是一个特殊的 attribute，和 `v-for` 章节中提到的 `key` 类似。它允许我们在一个特定的 DOM 元素或子组件实例被挂载后，获得对它的直接引用。这可能很有用，比如说在组件挂载时将焦点设置到一个 input 元素上，或在一个元素上初始化一个第三方库。
+
+#### 访问模板引用
+
+## 访问模板引用
+
+~~~js
+<script>
+export default {
+  mounted() {
+    this.$refs.input.focus()
+  }
+}
+</script>
+
+<template>
+  <input ref="input" />
+</template>
+
+~~~
+
+注意，你只可以**在组件挂载后**才能访问模板引用。如果你想在模板中的表达式上访问 `$refs.input`，在初次渲染时会是 `null`。这是因为在初次渲染前这个元素还不存在呢！
+
+#### `v-for` 中的模板引用(需要 v3.2.25 及以上版本)
+
+当在 `v-for` 中使用模板引用时，相应的引用中包含的值是一个数组：
+
+~~~js
+<script>
+export default {
+  data() {
+    return {
+      list: [
+        /* ... */
+      ]
+    }
+  },
+  mounted() {
+    console.log(this.$refs.items)
+  }
+}
+</script>
+
+<template>
+  <ul>
+    <li v-for="item in list" ref="items">
+      {{ item }}
+    </li>
+  </ul>
+</template>
+
+~~~
+
+<p style="color:red">应该注意的是，ref 数组**并不**保证与源数组相同的顺序。</p>
+
+----
+
+
+
+#### 函数模板引用
+
+除了使用字符串值作名字，`ref` attribute 还可以绑定为一个函数，会在每次组件更新时都被调用。该函数会收到元素引用作为其第一个参数：
+
+~~~js
+<input :ref="(el) => { /* 将 el 赋值给一个数据属性或 ref 变量 */ }">
+~~~
+
+注意我们这里需要使用动态的 `:ref` 绑定才能够传入一个函数。当绑定的元素被卸载时，函数也会被调用一次，此时的 `el` 参数会是 `null`。你当然也可以绑定一个组件方法而不是内联函数。
+
+#### 组件上的 ref
+
+模板引用也可以被用在一个子组件上。这种情况下引用中获得的值是组件实例：
+
+~~~js
+<script>
+import Child from './Child.vue'
+
+export default {
+  components: {
+    Child
+  },
+  mounted() {
+    // this.$refs.child 是 <Child /> 组件的实例
+  }
+}
+</script>
+
+<template>
+  <Child ref="child" />
+</template>
+~~~
+
+如果一个子组件使用的是选项式 API ，被引用的组件实例和该子组件的 `this` 完全一致，这意味着父组件对子组件的每一个属性和方法都有完全的访问权。这使得在父组件和子组件之间创建紧密耦合的实现细节变得很容易，当然也因此，应该只在绝对需要时才使用组件引用。大多数情况下，你应该首先使用标准的 props 和 emit 接口来实现父子组件交互。
+
+`expose` 选项可以用于限制对子组件实例的访问：
+
+~~~js
+export default {
+  expose: ['publicData', 'publicMethod'],
+  data() {
+    return {
+      publicData: 'foo',
+      privateData: 'bar'
+    }
+  },
+  methods: {
+    publicMethod() {
+      /* ... */
+    },
+    privateMethod() {
+      /* ... */
+    }
+  }
+}
+
+~~~
+
+<p style="color:yellow">在上面这个例子中，父组件通过模板引用访问到子组件实例后，仅能访问 `publicData` 和 `publicMethod`。</p>
+
+## 使用组件
+
+要使用一个子组件，我们需要在父组件中导入它。假设我们把计数器组件放在了一个叫做 `ButtonCounter.vue` 的文件中，这个组件将会以默认导出的形式被暴露给外部。
+
+~~~vue
+<script>
+import ButtonCounter from './ButtonCounter.vue'
+
+export default {
+  components: {
+    ButtonCounter
+  }
+}
+</script>
+
+<template>
+  <h1>Here is a child component!</h1>
+  <ButtonCounter />
+</template>
+
+~~~
+
+若要将导入的组件暴露给模板，我们需要在 `components` 选项上[注册](https://cn.vuejs.org/guide/components/registration.html)它。这个组件将会以其注册时的名字作为模板中的标签名。
+
+当然，你也可以全局地注册一个组件，使得它在当前应用中的任何组件上都可以使用，而不需要额外再导入。关于组件的全局注册和局部注册两种方式的利弊，我们放在了[组件注册](https://cn.vuejs.org/guide/components/registration.html)这一章节中专门讨论。
+
+组件可以被重用任意多次：
+
+~~~vue
+<h1>Here is a child component!</h1>
+<ButtonCounter />
+<ButtonCounter />
+<ButtonCounter />
+~~~
+
+你会注意到，每当点击这些按钮时，每一个组件都维护着自己的状态，是不同的 `count`。这是因为每当你使用一个组件，就创建了一个新的**实例**。
+
+在单文件组件中，推荐为子组件使用 `PascalCase` 的标签名，以此来和原生的 HTML 元素作区分。虽然原生 HTML 标签名是不区分大小写的，但 Vue 单文件组件是可以在编译中区分大小写的。我们也可以使用 `/>` 来关闭一个标签。
+
+如果你是直接在 DOM 中书写模板 (例如原生 `<template>` 元素的内容)，模板的编译需要遵从浏览器中 HTML 的解析行为。在这种情况下，你应该需要使用 `kebab-case` 形式并显式地关闭这些组件的标签。
+
+~~~js
+<!-- 如果是在 DOM 中书写该模板 -->
+<button-counter></button-counter>
+<button-counter></button-counter>
+<button-counter></button-counter>
+~~~
+
+
+
+
+
