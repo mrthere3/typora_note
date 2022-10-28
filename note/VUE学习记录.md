@@ -1922,7 +1922,846 @@ export default {
 
 无论声明类型的顺序如何，`Boolean` 类型的特殊转换规则都会被应用。
 
+## 组件事件
 
+### 触发与监听事件
+
+在组件的模板表达式中，可以直接使用 `$emit` 方法触发自定义事件 (例如：在 `v-on` 的处理函数中)：
+
+~~~html
+<!-- MyComponent -->
+<button @click="$emit('someEvent')">click me</button>
+~~~
+
+`$emit()` 方法在组件实例上也同样以 `this.$emit()` 的形式可用：
+
+~~~js
+export default {
+  methods: {
+    submit() {
+      this.$emit('submit')
+    }
+  }
+}
+~~~
+
+父组件可以通过 `v-on` (缩写为 `@`) 来监听事件：
+
+~~~vue
+<MyComponent @some-event="callback" />
+~~~
+
+同样，组件的事件监听器也支持 `.once` 修饰符：
+
+~~~vue
+<MyComponent @some-event.once="callback" />
+~~~
+
+像组件与 prop 一样，事件的名字也提供了自动的格式转换。注意这里我们触发了一个以 camelCase 形式命名的事件，但在父组件中可以使用 kebab-case 形式来监听。与 [prop 大小写格式](https://cn.vuejs.org/guide/components/props.html#prop-name-casing)一样，在模板中我们也推荐使用 kebab-case 形式来编写监听器。
+
+### 事件参数
+
+有时候我们会需要在触发事件时附带一个特定的值。举例来说，我们想要 `<BlogPost>` 组件来管理文本会缩放得多大。在这个场景下，我们可以给 `$emit` 提供一个额外的参数：
+
+~~~vue
+<button @click="$emit('increaseBy', 1)">
+  Increase by 1
+</button>
+~~~
+
+然后我们在父组件中监听事件，我们可以先简单写一个内联的箭头函数作为监听器，此函数会接收到事件附带的参数：
+
+~~~vue
+<MyButton @increase-by="(n) => count += n" />
+~~~
+
+或者，也可以用一个组件方法来作为事件处理函数：
+
+~~~vue
+<MyButton @increase-by="increaseCount" />
+~~~
+
+该方法也会接收到事件所传递的参数：
+
+~~~js
+methods: {
+  increaseCount(n) {
+    this.count += n
+  }
+}
+~~~
+
+### 声明触发的事件
+
+组件要触发的事件可以显式地通过 [`emits`](https://cn.vuejs.org/api/options-state.html#emits) 选项来声明：
+
+~~~js
+export default {
+  emits: ['inFocus', 'submit']
+}
+~~~
+
+这个 `emits` 选项还支持对象语法，它允许我们对触发事件的参数进行验证：
+
+~~~js
+export default {
+  emits: {
+    submit(payload) {
+      // 通过返回值为 `true` 还是为 `false` 来判断
+      // 验证是否通过
+    }
+  }
+}
+
+~~~
+
+### 事件校验
+
+和对 props 添加类型校验的方式类似，所有触发的事件也可以使用对象形式来描述。
+
+要为事件添加校验，那么事件可以被赋值为一个函数，接受的参数就是抛出事件时传入 `this.$emit` 的内容，返回一个布尔值来表明事件是否合法。
+
+~~~js
+export default {
+  emits: {
+    // 没有校验
+    click: null,
+
+    // 校验 submit 事件
+    submit: ({ email, password }) => {
+      if (email && password) {
+        return true
+      } else {
+        console.warn('Invalid submit event payload!')
+        return false
+      }
+    }
+  },
+  methods: {
+    submitForm(email, password) {
+      this.$emit('submit', { email, password })
+    }
+  }
+}
+
+~~~
+
+### 配合 `v-model` 使用
+
+自定义事件可以用于开发支持 `v-model` 的自定义表单组件。回忆一下 `v-model` 在原生元素上的用法：
+
+~~~html
+<input v-model="searchText" />
+~~~
+
+上面的代码其实等价于下面这段 (编译器会对 `v-model` 进行展开)：
+
+~~~html
+<input
+  :value="searchText"
+  @input="searchText = $event.target.value"
+/>
+~~~
+
+而当使用在一个组件上时，`v-model` 会被展开为如下的形式：
+
+~~~html
+<CustomInput
+  :modelValue="searchText"
+  @update:modelValue="newValue => searchText = newValue"
+/>
+~~~
+
+要让这个例子实际工作起来，`<CustomInput>` 组件内部需要做两件事：
+
+1. 将内部原生 `input` 元素的 `value` attribute 绑定到 `modelValue` prop
+2. 输入新的值时在 `input` 元素上触发 `update:modelValue` 事件
+
+这里是相应的代码：
+
+~~~vue
+<!-- CustomInput.vue -->
+<script>
+export default {
+  props: ['modelValue'],
+  emits: ['update:modelValue']
+}
+</script>
+
+<template>
+  <input
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
+  />
+</template>
+
+~~~
+
+现在 `v-model` 也可以在这个组件上正常工作了：
+
+~~~vue
+<CustomInput v-model="searchText" />
+~~~
+
+另一种在组件内实现 `v-model` 的方式是使用一个可写的，同时具有 getter 和 setter 的计算属性。`get` 方法需返回 `modelValue` prop，而 `set` 方法需触发相应的事件：
+
+~~~vue
+<!-- CustomInput.vue -->
+<script>
+export default {
+  props: ['modelValue'],
+  emits: ['update:modelValue'],
+  computed: {
+    value: {
+      get() {
+        return this.modelValue
+      },
+      set(value) {
+        this.$emit('update:modelValue', value)
+      }
+    }
+  }
+}
+</script>
+
+<template>
+  <input v-model="value" />
+</template>
+
+~~~
+
+#### `v-model` 的参数
+
+默认情况下，`v-model` 在组件上都是使用 `modelValue` 作为 prop，并以 `update:modelValue` 作为对应的事件。我们可以通过给 `v-model` 指定一个参数来更改这些名字：
+
+~~~html
+<MyComponent v-model:title="bookTitle" />
+~~~
+
+在这个例子中，子组件应声明一个 `title` prop，并通过触发 `update:title` 事件更新父组件值：
+
+~~~vue
+<!-- MyComponent.vue -->
+<script>
+export default {
+  props: ['title'],
+  emits: ['update:title']
+}
+</script>
+
+<template>
+  <input
+    type="text"
+    :value="title"
+    @input="$emit('update:title', $event.target.value)"
+  />
+</template>
+
+~~~
+
+#### 多个 `v-model` 绑定
+
+利用刚才在 [`v-model` 参数](https://cn.vuejs.org/guide/components/events.html#v-model-arguments)小节中学到的技巧，我们可以在一个组件上创建多个 `v-model` 双向绑定，每一个 `v-model` 都会同步不同的 prop：
+
+~~~vue
+<UserName
+  v-model:first-name="first"
+  v-model:last-name="last"
+/>
+~~~
+
+~~~vue
+<script>
+export default {
+  props: {
+    firstName: String,
+    lastName: String
+  },
+  emits: ['update:firstName', 'update:lastName']
+}
+</script>
+
+<template>
+  <input
+    type="text"
+    :value="firstName"
+    @input="$emit('update:firstName', $event.target.value)"
+  />
+  <input
+    type="text"
+    :value="lastName"
+    @input="$emit('update:lastName', $event.target.value)"
+  />
+</template>
+
+~~~
+
+~~~vue
+<!--APP.vue-->
+<script>
+import UserName from './UserName.vue'
+
+export default {
+  components: { UserName },
+  data() {
+    return {
+      first: 'John',
+      last: 'Doe'
+    }
+  }
+}
+</script>
+
+<template>
+  <h1>{{ first }} {{ last }}</h1>
+  <UserName
+    v-model:first-name="first"
+    v-model:last-name="last"
+  />
+</template>
+~~~
+
+#### 处理 `v-model` 修饰符
+
+在学习输入绑定时，我们知道了 `v-model` 有一些[内置的修饰符](https://cn.vuejs.org/guide/essentials/forms.html#modifiers)，例如 `.trim`，`.number` 和 `.lazy`。在某些场景下，你可能想要一个自定义组件的 `v-model` 支持自定义的修饰符。
+
+我们来创建一个自定义的修饰符 `capitalize`，它会自动将 `v-model` 绑定输入的字符串值第一个字母转为大写：
+
+~~~vue
+<MyComponent v-model.capitalize="myText" />
+~~~
+
+组件的 `v-model` 上所添加的修饰符，可以通过 `modelModifiers` prop 在组件内访问到。在下面的组件中，我们声明了 `modelModifiers` 这个 prop，它的默认值是一个空对象：
+
+~~~vue
+<script>
+export default {
+  props: {
+    modelValue: String,
+    modelModifiers: {
+      default: () => ({})
+    }
+  },
+  emits: ['update:modelValue'],
+  created() {
+    console.log(this.modelModifiers) // { capitalize: true }
+  }
+}
+</script>
+
+<template>
+  <input
+    type="text"
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
+  />
+</template>
+
+~~~
+
+注意这里组件的 `modelModifiers` prop 包含了 `capitalize` 且其值为 `true`，因为它在模板中的 `v-model` 绑定上被使用了。
+
+有了 `modelModifiers` 这个 prop，我们就可以在原生事件侦听函数中检查它的值，然后决定触发的自定义事件中要向父组件传递什么值。在下面的代码里，我们就是在每次 `<input>` 元素触发 `input` 事件时将值的首字母大写：
+
+~~~vue
+<script>
+export default {
+  props: {
+    modelValue: String,
+    modelModifiers: {
+      default: () => ({})
+    }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    emitValue(e) {
+      let value = e.target.value
+      if (this.modelModifiers.capitalize) {
+        value = value.charAt(0).toUpperCase() + value.slice(1)
+      }
+      this.$emit('update:modelValue', value)
+    }
+  }
+}
+</script>
+
+<template>
+  <input type="text" :value="modelValue" @input="emitValue" />
+</template>
+
+~~~
+
+对于又有参数又有修饰符的 `v-model` 绑定，生成的 prop 名将是 `arg + "Modifiers"`。举例来说：
+
+~~~html
+<MyComponent v-model:title.capitalize="myText">
+~~~
+
+相应的声明应该是：
+
+~~~js
+export default {
+  props: ['title', 'titleModifiers'],
+  emits: ['update:title'],
+  created() {
+    console.log(this.titleModifiers) // { capitalize: true }
+  }
+}
+
+~~~
+
+****
+
+## Attributes 继承
+
+“透传 attribute”指的是传递给一个组件，却没有被该组件声明为 [props](https://cn.vuejs.org/guide/components/props.html) 或 [emits](https://cn.vuejs.org/guide/components/events.html#defining-custom-events) 的 attribute 或者 `v-on` 事件监听器。最常见的例子就是 `class`、`style` 和 `id`。
+
+当一个组件以单个元素为根作渲染时，透传的 attribute 会自动被添加到根元素上。举例来说，假如我们有一个 `<MyButton>` 组件，它的模板长这样：
+
+~~~html
+<!-- <MyButton> 的模板 -->
+<button>click me</button>
+~~~
+
+一个父组件使用了这个组件，并且传入了 `class`：
+
+~~~html
+<MyButton class="large" />
+~~~
+
+最后渲染出的 DOM 结果是：
+
+~~~html
+<button class="large">click me</button>
+~~~
+
+这里，`<MyButton>` 并没有将 `class` 声明为一个它所接受的 prop，所以 `class` 被视作透传 attribute，自动透传到了 `<MyButton>` 的根元素上。
+
+### 对 `class` 和 `style` 的合并
+
+如果一个子组件的根元素已经有了 `class` 或 `style` attribute，它会和从父组件上继承的值合并。如果我们将之前的 `<MyButton>` 组件的模板改成这样：
+
+~~~html
+<!-- <MyButton> 的模板 -->
+<button class="btn">click me</button>
+~~~
+
+则最后渲染出的 DOM 结果会变成：
+
+~~~html
+<button class="btn large">click me</button>
+~~~
+
+### `v-on` 监听器继承
+
+同样的规则也适用于 `v-on` 事件监听器：
+
+~~~html
+<MyButton @click="onClick" />
+~~~
+
+`click` 监听器会被添加到 `<MyButton>` 的根元素，即那个原生的 `<button>` 元素之上。当原生的 `<button>` 被点击，会触发父组件的 `onClick` 方法。同样的，如果原生 `button` 元素自身也通过 `v-on` 绑定了一个事件监听器，则这个监听器和从父组件继承的监听器都会被触发。
+
+### 深层组件继承
+
+有些情况下一个组件会在根节点上渲染另一个组件。例如，我们重构一下 `<MyButton>`，让它在根节点上渲染 `<BaseButton>`：
+
+~~~html
+<!-- <MyButton/> 的模板，只是渲染另一个组件 -->
+<BaseButton />
+~~~
+
+此时 `<MyButton>` 接收的透传 attribute 会直接继续传给 `<BaseButton>`。
+
+请注意：
+
+1. 透传的 attribute 不会包含 `<MyButton>` 上声明过的 props 或是针对 `emits` 声明事件的 `v-on` 侦听函数，换句话说，声明过的 props 和侦听函数被 `<MyButton>`“消费”了。
+2. 透传的 attribute 若符合声明，也可以作为 props 传入 `<BaseButton>`。
+
+### 禁用 Attributes 继承
+
+如果你**不想要**一个组件自动地继承 attribute，你可以在组件选项中设置 `inheritAttrs: false`。
+
+最常见的需要禁用 attribute 继承的场景就是 attribute 需要应用在根节点以外的其他元素上。通过设置 `inheritAttrs` 选项为 `false`，你可以完全控制透传进来的 attribute 被如何使用。
+
+这些透传进来的 attribute 可以在模板的表达式中直接用 `$attrs` 访问到。
+
+~~~html
+<span>Fallthrough attribute: {{ $attrs }}</span>
+~~~
+
+这个 `$attrs` 对象包含了除组件所声明的 `props` 和 `emits` 之外的所有其他 attribute，例如 `class`，`style`，`v-on` 监听器等等。
+
+有几点需要注意：
+
+- 和 props 有所不同，透传 attributes 在 JavaScript 中保留了它们原始的大小写，所以像 `foo-bar` 这样的一个 attribute 需要通过 `$attrs['foo-bar']` 来访问。
+- 像 `@click` 这样的一个 `v-on` 事件监听器将在此对象下被暴露为一个函数 `$attrs.onClick`。
+
+现在我们要再次使用一下[之前小节](https://cn.vuejs.org/guide/components/attrs.html#attribute-inheritance)中的 `<MyButton>` 组件例子。有时候我们可能为了样式，需要在 `<button>` 元素外包装一层 `<div>`：
+
+~~~html
+<div class="btn-wrapper">
+  <button class="btn">click me</button>
+</div>
+~~~
+
+我们想要所有像 `class` 和 `v-on` 监听器这样的透传 attribute 都应用在内部的 `<button>` 上而不是外层的 `<div>` 上。我们可以通过设定 `inheritAttrs: false` 和使用 `v-bind="$attrs"` 来实现：
+
+~~~html
+<div class="btn-wrapper">
+  <button class="btn" v-bind="$attrs">click me</button>
+</div>
+~~~
+
+小提示：[没有参数的 `v-bind`](https://cn.vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes) 会将一个对象的所有属性都作为 attribute 应用到目标元素上。
+
+### 多根节点的 Attributes 继承
+
+和单根节点组件有所不同，有着多个根节点的组件没有自动 attribute 透传行为。如果 `$attrs` 没有被显式绑定，将会抛出一个运行时警告。
+
+~~~html
+<CustomLayout id="custom-layout" @click="changeValue" />
+~~~
+
+如果 `<CustomLayout>` 有下面这样的多根节点模板，由于 Vue 不知道要将 attribute 透传到哪里，所以会抛出一个警告。
+
+~~~html
+<header>...</header>
+<main>...</main>
+<footer>...</footer>
+~~~
+
+如果 `$attrs` 被显式绑定，则不会有警告：
+
+~~~html
+<header>...</header>
+<main v-bind="$attrs">...</main>
+<footer>...</footer>
+~~~
+
+### 在 JavaScript 中访问透传 Attributes
+
+如果需要，你可以通过 `$attrs` 这个实例属性来访问组件的所有透传 attribute：
+
+~~~js
+export default {
+  created() {
+    console.log(this.$attrs)
+  }
+}
+~~~
+
+## 插槽 Slots
+
+### 插槽内容与出口
+
+在之前的章节中，我们已经了解到组件能够接收任意类型的 JavaScript 值作为 props，但组件要如何接收模板内容呢？在某些场景中，我们可能想要为子组件传递一些模板片段，让子组件在它们的组件中渲染这些片段。
+
+举例来说，这里有一个 `<FancyButton>` 组件，可以像这样使用：
+
+~~~html
+<FancyButton>
+  Click me! <!-- 插槽内容 -->
+</FancyButton>
+~~~
+
+而 `<FancyButton>` 的模板是这样的：
+
+~~~html
+<button class="fancy-btn">
+  <slot></slot> <!-- 插槽出口 -->
+</button>
+~~~
+
+`<slot>` 元素是一个**插槽出口** (slot outlet)，标示了父元素提供的**插槽内容** (slot content) 将在哪里被渲染。
+
+最终渲染出的 DOM 是这样：
+
+~~~html
+<button class="fancy-btn">Click me!</button>
+~~~
+
+通过使用插槽，`<FancyButton>` 仅负责渲染外层的 `<button>` (以及相应的样式)，而其内部的内容由父组件提供。
+
+理解插槽的另一种方式是和下面的 JavaScript 函数作类比，其概念是类似的：
+
+~~~js
+// 父元素传入插槽内容
+FancyButton('Click me!')
+
+// FancyButton 在自己的模板中渲染插槽内容
+function FancyButton(slotContent) {
+  return `<button class="fancy-btn">
+      ${slotContent}
+    </button>`
+}
+~~~
+
+插槽内容可以是任意合法的模板内容，不局限于文本。例如我们可以传入多个元素，甚至是组件：
+
+~~~html
+<FancyButton>
+  <span style="color:red">Click me!</span>
+  <AwesomeIcon name="plus" />
+</FancyButton>
+~~~
+
+通过使用插槽，`<FancyButton>` 组件更加灵活和具有可复用性。现在组件可以用在不同的地方渲染各异的内容，但同时还保证都具有相同的样式。
+
+Vue 组件的插槽机制是受[原生 Web Component `` 元素](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot)的启发而诞生，同时还做了一些功能拓展，这些拓展的功能我们后面会学习到。
+
+### 渲染作用域
+
+插槽内容可以访问到父组件的数据作用域，因为插槽内容本身是在父组件模板中定义的。举例来说：
+
+~~~html
+<span>{{ message }}</span>
+<FancyButton>{{ message }}</FancyButton>
+~~~
+
+这里的两个 `{{ message }}` 插值表达式渲染的内容都是一样的。
+
+插槽内容**无法访问**子组件的数据。Vue 模板中的表达式只能访问其定义时所处的作用域，这和 JavaScript 的词法作用域规则是一致的。换言之：
+
+`父组件模板中的表达式只能访问父组件的作用域；子组件模板中的表达式只能访问子组件的作用域。`
+
+### 默认内容
+
+在外部没有提供任何内容的情况下，可以为插槽指定默认内容。比如有这样一个 `<SubmitButton>` 组件：
+
+~~~html
+<button type="submit">
+  <slot></slot>
+</button>
+~~~
+
+如果我们想在父组件没有提供任何插槽内容时在 `<button>` 内渲染“Submit”，只需要将“Submit”写在 `<slot>` 标签之间来作为默认内容：
+
+~~~html
+<button type="submit">
+  <slot>
+    Submit <!-- 默认内容 -->
+  </slot>
+</button>
+~~~
+
+现在，当我们在父组件中使用 `<SubmitButton>` 且没有提供任何插槽内容时：
+
+~~~html
+<SubmitButton />
+~~~
+
+“Submit”将会被作为默认内容渲染：
+
+~~~html
+<button type="submit">Submit</button>
+~~~
+
+但如果我们提供了插槽内容：
+
+~~~html
+<SubmitButton>Save</SubmitButton>
+~~~
+
+那么被显式提供的内容会取代默认内容：
+
+~~~html
+<button type="submit">Save</button>
+~~~
+
+### 具名插槽
+
+有时在一个组件中包含多个插槽出口是很有用的。举例来说，在一个 `<BaseLayout>` 组件中，有如下模板：
+
+~~~html
+<div class="container">
+  <header>
+    <!-- 标题内容放这里 -->
+  </header>
+  <main>
+    <!-- 主要内容放这里 -->
+  </main>
+  <footer>
+    <!-- 底部内容放这里 -->
+  </footer>
+</div>
+
+~~~
+
+对于这种场景，`<slot>` 元素可以有一个特殊的 attribute `name`，用来给各个插槽分配唯一的 ID，以确定每一处要渲染的内容：
+
+~~~html
+<div class="container">
+  <header>
+    <slot name="header"></slot>
+  </header>
+  <main>
+    <slot></slot>
+  </main>
+  <footer>
+    <slot name="footer"></slot>
+  </footer>
+</div>
+
+~~~
+
+这类带 `name` 的插槽被称为具名插槽 (named slots)。没有提供 `name` 的 `<slot>` 出口会隐式地命名为“default”。
+
+在父组件中使用 `<BaseLayout>` 时，我们需要一种方式将多个插槽内容传入到各自目标插槽的出口。此时就需要用到**具名插槽**了：
+
+要为具名插槽传入内容，我们需要使用一个含 `v-slot` 指令的 `<template>` 元素，并将目标插槽的名字传给该指令：
+
+~~~html
+<BaseLayout>
+  <template v-slot:header>
+    <!-- header 插槽的内容放这里 -->
+  </template>
+</BaseLayout>
+~~~
+
+`v-slot` 有对应的简写 `#`，因此 `<template v-slot:header>` 可以简写为 `<template #header>`。其意思就是“将这部分模板片段传入子组件的 header 插槽中”。
+
+下面我们给出完整的、向 `<BaseLayout>` 传递插槽内容的代码，指令均使用的是缩写形式：
+
+~~~html
+<BaseLayout>
+  <template #header>
+    <h1>Here might be a page title</h1>
+  </template>
+
+  <template #default>
+    <p>A paragraph for the main content.</p>
+    <p>And another one.</p>
+  </template>
+
+  <template #footer>
+    <p>Here's some contact info</p>
+  </template>
+</BaseLayout>
+
+~~~
+
+当一个组件同时接收默认插槽和具名插槽时，所有位于顶级的非 `<template>` 节点都被隐式地视为默认插槽的内容。所以上面也可以写成：
+
+~~~html
+<BaseLayout>
+  <template #header>
+    <h1>Here might be a page title</h1>
+  </template>
+
+  <!-- 隐式的默认插槽 -->
+  <p>A paragraph for the main content.</p>
+  <p>And another one.</p>
+
+  <template #footer>
+    <p>Here's some contact info</p>
+  </template>
+</BaseLayout>
+
+~~~
+
+现在 `<template>` 元素中的所有内容都将被传递到相应的插槽。最终渲染出的 HTML 如下：
+
+~~~html
+<div class="container">
+  <header>
+    <h1>Here might be a page title</h1>
+  </header>
+  <main>
+    <p>A paragraph for the main content.</p>
+    <p>And another one.</p>
+  </main>
+  <footer>
+    <p>Here's some contact info</p>
+  </footer>
+</div>
+
+~~~
+
+使用 JavaScript 函数来类比可能更有助于你来理解具名插槽：
+
+~~~js
+// 传入不同的内容给不同名字的插槽
+BaseLayout({
+  header: `...`,
+  default: `...`,
+  footer: `...`
+})
+
+// <BaseLayout> 渲染插槽内容到对应位置
+function BaseLayout(slots) {
+  return `<div class="container">
+      <header>${slots.header}</header>
+      <main>${slots.default}</main>
+      <footer>${slots.footer}</footer>
+    </div>`
+}
+
+~~~
+
+### 动态插槽名
+
+[动态指令参数](https://cn.vuejs.org/guide/essentials/template-syntax.html#dynamic-arguments)在 `v-slot` 上也是有效的，即可以定义下面这样的动态插槽名：
+
+~~~html
+<base-layout>
+  <template v-slot:[dynamicSlotName]>
+    ...
+  </template>
+
+  <!-- 缩写为 -->
+  <template #[dynamicSlotName]>  
+    ...
+  </template>
+</base-layout>
+~~~
+
+注意这里的表达式和动态指令参数受相同的[语法限制](https://cn.vuejs.org/guide/essentials/template-syntax.html#directives)。
+
+### 作用域插槽
+
+在上面的[渲染作用域](https://cn.vuejs.org/guide/components/slots.html#render-scope)中我们讨论到，插槽的内容无法访问到子组件的状态。
+
+然而在某些场景下插槽的内容可能想要同时使用父组件域内和子组件域内的数据。要做到这一点，我们需要一种方法来让子组件在渲染时将一部分数据提供给插槽。
+
+我们也确实有办法这么做！可以像对组件传递 props 那样，向一个插槽的出口上传递 attributes：
+
+~~~html
+<!-- <MyComponent> 的模板 -->
+<div>
+  <slot :text="greetingMessage" :count="1"></slot>
+</div>
+~~~
+
+当需要接收插槽 props 时，默认插槽和具名插槽的使用方式有一些小区别。下面我们将先展示默认插槽如何接受 props，通过子组件标签上的 `v-slot` 指令，直接接收到了一个插槽 props 对象：
+
+~~~html
+<MyComponent v-slot="slotProps">
+  {{ slotProps.text }} {{ slotProps.count }}
+</MyComponent>
+~~~
+
+子组件传入插槽的 props 作为了 `v-slot` 指令的值，可以在插槽内的表达式中访问。
+
+你可以将作用域插槽类比为一个传入子组件的函数。子组件会将相应的 props 作为参数传给它：
+
+~~~js
+MyComponent({
+  // 类比默认插槽，将其想成一个函数
+  default: (slotProps) => {
+    return `${slotProps.text} ${slotProps.count}`
+  }
+})
+
+function MyComponent(slots) {
+  const greetingMessage = 'hello'
+  return `<div>${
+    // 在插槽函数调用时传入 props
+    slots.default({ text: greetingMessage, count: 1 })
+  }</div>`
+}
+
+~~~
 
 
 
